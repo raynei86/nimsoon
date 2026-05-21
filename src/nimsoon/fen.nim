@@ -5,12 +5,12 @@ import position
 
 proc fenCharToPiece(ch: char): PieceType =
   case ch.toLowerAscii()
-  of 'p': Pawn
-  of 'n': Knight
-  of 'b': Bishop
-  of 'r': Rook
-  of 'q': Queen
-  of 'k': King
+  of 'p': ptPawn
+  of 'n': ptKnight
+  of 'b': ptBishop
+  of 'r': ptRook
+  of 'q': ptQueen
+  of 'k': ptKing
   else: raise newException(ValueError, "Invalid FEN piece char: " & ch)
 
 func fenCharToColor(ch: char): Color =

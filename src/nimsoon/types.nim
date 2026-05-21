@@ -42,7 +42,7 @@ type
   Color* {.pure.} = enum 
     White, Black
   PieceType* = enum
-    Pawn, Knight, Bishop, Rook, Queen, King
+    ptPawn, ptKnight, ptBishop, ptRook, ptQueen, ptKing
   CastlingSide* = enum
     csWhiteKingside, csWhiteQueenside, csBlackKingside, csBlackQueenside
   CastlingRights* = set[CastlingSide]

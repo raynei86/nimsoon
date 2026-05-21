@@ -25,9 +25,9 @@ func colorAt*(pos: Position, sq: Square): Color {.inline.} =
   elif testBit(pos.colors[Color.Black], sq): return Color.Black
   else: assert false, "colorAt called on an empty square" & $sq
 
-func pieceAt(pos: Position, sq: Square): PieceType {.inline.} =
+func pieceAt*(pos: Position, sq: Square): PieceType {.inline.} =
   ## Assumes square is occupied
-  for piece in Pawn..King:
+  for piece in ptPawn..ptKing:
     let combinedBB = pos.pieces[White][piece] or pos.pieces[Black][piece]
 
     if combinedBB.testBit(sq):
