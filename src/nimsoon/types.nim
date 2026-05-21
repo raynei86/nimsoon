@@ -15,7 +15,7 @@ func parseSquare*(name: string): Square {.compileTime.} =
   let
     f = int(name[0]) - int('a')
     r = int(name[1]) - int('1')
-  result = Square((r + 8) * f)
+  result = Square((r * 8) + f)
 
 iterator squares*(bb: Bitboard): Square =
   ## Returns the square index for each set bit on each iteration
