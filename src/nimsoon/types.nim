@@ -27,6 +27,12 @@ iterator squares*(bb: Bitboard): Square =
 
     bits = bits and (bits - 1)
 
+func lsb*(bb: Bitboard): Square {.inline.} =
+  Square(countTrailingZeroBits(bb))
+
+func msb*(bb: Bitboard): Square {.inline.} =
+  Square(63 - countLeadingZeroBits(bb))
+    
 const
   FullBoard* : Bitboard = 0xFFFFFFFFFFFFFFFF'u64
   Rank1* : Bitboard = 0x00000000000000FF'u64
@@ -46,3 +52,9 @@ type
   CastlingSide* = enum
     csWhiteKingside, csWhiteQueenside, csBlackKingside, csBlackQueenside
   CastlingRights* = set[CastlingSide]
+
+func opponent*(c: Color): Color =
+  if c == Color.White:
+    Color.Black
+  else:
+    Color.White
