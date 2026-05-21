@@ -2,7 +2,7 @@ import std/[bitops]
 
 # Board related types and utils
 type
-  Square = range[0..63]
+  Square* = range[0..64]
   Rank = range[0..7]
   File = range[0..7]
   Bitboard* = uint64
@@ -28,21 +28,21 @@ iterator squares*(bb: Bitboard): Square =
     bits = bits and (bits - 1)
 
 const
-  FullBoard* : Bitboard = 0xFFFFFFFFFFFFFFFF_u64
-  Rank1* : Bitboard = 0x00000000000000FF_u64
-  Rank2* : Bitboard = 0x000000000000FF00_u64
-  Rank7* : Bitboard = 0x00FF000000000000_u64
-  Rank8* : Bitboard = 0xFF00000000000000_u64
-  NotFileA* : Bitboard = 0xFEFEFEFEFEFEFEFE_u64
-  NotFileH* : Bitboard = 0x7F7F7F7F7F7F7F7F_u64
+  FullBoard* : Bitboard = 0xFFFFFFFFFFFFFFFF'u64
+  Rank1* : Bitboard = 0x00000000000000FF'u64
+  Rank2* : Bitboard = 0x000000000000FF00'u64
+  Rank7* : Bitboard = 0x00FF000000000000'u64
+  Rank8* : Bitboard = 0xFF00000000000000'u64
+  NotFileA* : Bitboard = 0xFEFEFEFEFEFEFEFE'u64
+  NotFileH* : Bitboard = 0x7F7F7F7F7F7F7F7F'u64
 
 
 # Pieces related types
 type
-  Color* = enum {.pure.}
+  Color* {.pure.} = enum 
     White, Black
   PieceType* = enum
     Pawn, Knight, Bishop, Rook, Queen, King
-  CastlingSide = enum
+  CastlingSide* = enum
     csWhiteKingside, csWhiteQueenside, csBlackKingside, csBlackQueenside
-  CastlingRights = set[CastlingSide]
+  CastlingRights* = set[CastlingSide]

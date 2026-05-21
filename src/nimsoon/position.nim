@@ -1,5 +1,7 @@
 import std/[bitops]
 
+import types
+
 # The main object representing a chess position
 type
   Position* = object
@@ -8,37 +10,37 @@ type
     occupied*: Bitboard
 
     side*: Color
-    castlingRights*: CastingRights
+    castlingRights*: CastlingRights
     epSquare*: Square
-    halfmoveClock: uint8
-    fullmoveClock: uint16
+    halfmoveClock*: uint8
+    fullmoveClock*: uint16
     hash*: HashKey
 
 func isOccupied*(pos: Position, sq: Square): bool {.inline.} =
-  result = testBit(pos.occupied[sq])
+  result = testBit(pos.occupied, sq)
 
 func colorAt*(pos: Position, sq: Square): Color {.inline.} =
   ## Assumes square is occupied
-  if testBit(pos.colors[Color.White][sq]): return Color.White
-  elif testBit(pos.colors[Color.Black][sq]): return Color.Black
+  if testBit(pos.colors[Color.White], sq): return Color.White
+  elif testBit(pos.colors[Color.Black], sq): return Color.Black
   else: assert false, "colorAt called on an empty square" & $sq
 
 func pieceAt(pos: Position, sq: Square): PieceType {.inline.} =
   ## Assumes square is occupied
   for piece in Pawn..King:
-    let combinedBB = boards.pieces[White][piece] or board.pieces[Black][piece]
+    let combinedBB = pos.pieces[White][piece] or pos.pieces[Black][piece]
 
     if combinedBB.testBit(sq):
       return piece
 
   assert false, "pieceAt called on an empty square" & $sq
 
-proc placePiece(pos: var Position, sq: Square, color: Color, piece: pieceType) =
+proc placePiece*(pos: var Position, sq: Square, color: Color, piece: PieceType) =
   pos.pieces[color][piece].setBit(sq)
   pos.colors[color].setBit(sq)
   pos.occupied.setBit(sq)
 
-proc placePiece(pos: var Position, sq: Square, color: Color, piece: pieceType) =
+proc removePiece*(pos: var Position, sq: Square, color: Color, piece: PieceType) =
   pos.pieces[color][piece].clearBit(sq)
   pos.colors[color].clearBit(sq)
   pos.occupied.clearBit(sq)
