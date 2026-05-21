@@ -1,3 +1,2 @@
-import nimchess/[position]
 
 

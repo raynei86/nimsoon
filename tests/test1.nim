@@ -5,8 +5,10 @@
 #
 # To run these tests, simply execute `nimble test`.
 
-import unittest
+import std/[unittest, bitops]
 
-import nimsoon
-test "can add":
-  check add(5, 5) == 10
+import nimsoon/[types, position, fen]
+
+test "create position from fen":
+  let startingPos = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+  check testBit(startingPos.occupied, 0) == true
