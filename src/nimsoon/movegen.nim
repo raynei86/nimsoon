@@ -1,0 +1,199 @@
+import std/[bitops, options]
+import types, position, move, magic
+
+func computeKnightAttacks(): array[64, Bitboard] =
+  const offsets = [17, 10, -6, -15, -17, -10, 6, 15]
+  
+  for sq in 0..63:
+    let fromFile = fileOf(sq)
+    let fromRank = rankOf(sq)
+    
+    for offset in offsets:
+      let toSq = sq + offset
+      
+      if toSq in 0..63:
+        let toFile = fileOf(toSq)
+        let toRank = rankOf(toSq)
+        let df = abs(fromFile - toFile)
+        let dr = abs(fromRank - toRank)
+        
+        if (df == 1 and dr == 2) or (dr == 1 and df == 2):
+          result[sq].setBit(toSq)
+
+func computeKingAttacks(): array[64, Bitboard] =
+  const offsets = [8, -8, 1, -1, 9, 7, -7, -9]
+  
+  for sq in 0..63:
+    let fromFile = fileOf(sq)
+    
+    for offset in offsets:
+      let toSq = sq + offset
+      
+      if toSq in 0..63:
+        let toFile = fileOf(toSq)
+        
+        if abs(fromFile - toFile) <= 1:
+          result[sq].setBit(toSq)
+
+const KnightAttacks*: array[64, Bitboard] = computeKnightAttacks()
+const KingAttacks*: array[64, Bitboard] = computeKingAttacks()
+
+iterator generateKnightMoves*(pos: Position): Move {.inline.} =
+  let friendly = pos.colors[pos.side]
+  let enemy    = pos.colors[pos.side.opponent]
+  for sq in pos.pieces[pos.side][ptKnight].squares:
+    let attacks = KnightAttacks[sq] and not friendly
+    for target in (attacks and enemy).squares:
+      yield Move(start: sq, finish: target, flags: {mfCapture})
+    for target in (attacks and not enemy).squares:
+      yield Move(start: sq, finish: target, flags: {})
+ 
+iterator generateKingMoves*(pos: Position): Move {.inline.} =
+  let friendly = pos.colors[pos.side]
+  let enemy    = pos.colors[pos.side.opponent]
+  for sq in pos.pieces[pos.side][ptKing].squares:
+    let attacks = KingAttacks[sq] and not friendly
+    for target in (attacks and enemy).squares:
+      yield Move(start: sq, finish: target, flags: {mfCapture})
+    for target in (attacks and not enemy).squares:
+      yield Move(start: sq, finish: target, flags: {})
+ 
+iterator generateRookMoves*(pos: Position): Move {.inline.} =
+  let friendly = pos.colors[pos.side]
+  let enemy    = pos.colors[pos.side.opponent]
+  for sq in pos.pieces[pos.side][ptRook].squares:
+    let attacks = rookAttacks(sq, pos.occupied) and not friendly
+    for target in (attacks and enemy).squares:
+      yield Move(start: sq, finish: target, flags: {mfCapture})
+    for target in (attacks and not enemy).squares:
+      yield Move(start: sq, finish: target, flags: {})
+
+ 
+iterator generateBishopMoves*(pos: Position): Move {.inline.} =
+  let friendly = pos.colors[pos.side]
+  let enemy    = pos.colors[pos.side.opponent]
+  for sq in pos.pieces[pos.side][ptBishop].squares:
+    let attacks = bishopAttacks(sq, pos.occupied) and not friendly
+    for target in (attacks and enemy).squares:
+      yield Move(start: sq, finish: target, flags: {mfCapture})
+    for target in (attacks and not enemy).squares:
+      yield Move(start: sq, finish: target, flags: {})
+ 
+iterator generateQueenMoves*(pos: Position): Move {.inline.} =
+  let friendly = pos.colors[pos.side]
+  let enemy    = pos.colors[pos.side.opponent]
+  for sq in pos.pieces[pos.side][ptQueen].squares:
+    let attacks = queenAttacks(sq, pos.occupied) and not friendly
+    for target in (attacks and enemy).squares:
+      yield Move(start: sq, finish: target, flags: {mfCapture})
+    for target in (attacks and not enemy).squares:
+      yield Move(start: sq, finish: target, flags: {})
+ 
+
+## Now pawns
+iterator generatePawnMoves*(pos: Position): Move {.inline.} =
+  let side  = pos.side
+  let enemy = pos.colors[side.opponent]
+  let empty = not pos.occupied
+ 
+  let (pushShift, capEShift, capWShift, startRank, promoRank) =
+    if side == White: ( 8,  9,  7, Rank2, Rank8)
+    else:             (-8, -7, -9, Rank7, Rank1)
+ 
+  let pawns = pos.pieces[side][ptPawn]
+ 
+  # Single and double pushes
+  let push1 = shift(pawns, pushShift) and empty
+  let push2 = shift(shift(pawns and startRank, pushShift) and empty, pushShift) and empty
+ 
+  # Diagonal captures (mask the wrapping file before shifting)
+  let capE = shift(pawns and NotFileH, capEShift) and enemy
+  let capW = shift(pawns and NotFileA, capWShift) and enemy
+
+  # Local templates allow yielding directly from the iterator's context!
+  template yieldPawnMoves(targets: Bitboard, shiftAmt: int, mFlags: MoveFlags = {}) =
+    for target in targets.squares:
+      yield Move(start: Square(target.int - shiftAmt), finish: target, promotion: ptPawn, flags: mFlags)
+
+  template yieldPawnPromos(targets: Bitboard, shiftAmt: int, mFlags: MoveFlags = {}) =
+    for target in targets.squares:
+      let src = Square(target.int - shiftAmt)
+      for promo in [ptKnight, ptBishop, ptRook, ptQueen]:
+        yield Move(start: src, finish: target, promotion: promo, flags: mFlags)
+
+  yieldPawnMoves( push1 and not promoRank, pushShift)
+  yieldPawnMoves( push2,                   pushShift * 2, {mfDouble})
+  yieldPawnMoves( capE  and not promoRank, capEShift,     {mfCapture})
+  yieldPawnMoves( capW  and not promoRank, capWShift,     {mfCapture})
+ 
+  yieldPawnPromos(push1 and promoRank,     pushShift)
+  yieldPawnPromos(capE  and promoRank,     capEShift,     {mfCapture})
+  yieldPawnPromos(capW  and promoRank,     capWShift,     {mfCapture})
+ 
+  # En passant: same capture logic but targeted at the ep square bitboard
+  if pos.epSquare.isSome:
+    let epBB   = Bitboard(1) shl pos.epSquare.get
+    let epCapE = shift(pawns and NotFileH, capEShift) and epBB
+    let epCapW = shift(pawns and NotFileA, capWShift) and epBB
+    yieldPawnMoves(epCapE, capEShift, {mfCapture, mfEp})
+    yieldPawnMoves(epCapW, capWShift, {mfCapture, mfEp})
+ 
+iterator generateCastlingMoves*(pos: Position): Move {.inline.} =
+  let rights   = pos.castlingRights
+  let occupied = pos.occupied
+  if pos.side == White:
+    if csWhiteKingside  in rights and (occupied and WhiteKingsidePath) == 0:
+      yield Move(start: Square(4),  finish: Square(6),  promotion: ptPawn, flags: {mfKingside})
+    if csWhiteQueenside in rights and (occupied and WhiteQueensidePath) == 0:
+      yield Move(start: Square(4),  finish: Square(2),  promotion: ptPawn, flags: {mfQueenside})
+  else:
+    if csBlackKingside  in rights and (occupied and BlackKingsidePath) == 0:
+      yield Move(start: Square(60), finish: Square(62), promotion: ptPawn, flags: {mfKingside})
+    if csBlackQueenside in rights and (occupied and BlackQueensidePath) == 0:
+      yield Move(start: Square(60), finish: Square(58), promotion: ptPawn, flags: {mfQueenside})
+ 
+func isKingChecked*(pos: Position, color: Color): bool =
+  let kingBB = pos.pieces[color][ptKing]
+  if kingBB == 0: return false
+  let kSq  = lsb(kingBB)
+  let opp  = color.opponent
+  let occ  = pos.occupied
+ 
+  let diagSliders = pos.pieces[opp][ptBishop] or pos.pieces[opp][ptQueen]
+  let orthSliders = pos.pieces[opp][ptRook]   or pos.pieces[opp][ptQueen]
+ 
+  # Cast "pawn attacks" from the king outward; if an enemy pawn occupies
+  # one of those squares it is giving check.
+  let (capE, capW) = if color == White: (9, 7) else: (-7, -9)
+  let pawnThreat =
+    (shift(kingBB and NotFileH, capE) or shift(kingBB and NotFileA, capW)) and
+    pos.pieces[opp][ptPawn]
+ 
+  pawnThreat != 0 or
+  (KnightAttacks[kSq]        and pos.pieces[opp][ptKnight]) != 0 or
+  (bishopAttacks(kSq, occ)   and diagSliders)               != 0 or
+  (rookAttacks(kSq, occ)     and orthSliders)               != 0 or
+  (KingAttacks[kSq]          and pos.pieces[opp][ptKing])   != 0
+ 
+func isLegalMove*(pos: Position, mv: Move): bool =
+  not isKingChecked(doMove(pos, mv), pos.side)
+
+iterator generateMoves*(pos: Position): Move {.inline.} =
+  for mv in generatePawnMoves(pos): yield mv
+  for mv in generateKnightMoves(pos): yield mv
+  for mv in generateBishopMoves(pos): yield mv
+  for mv in generateRookMoves(pos): yield mv
+  for mv in generateQueenMoves(pos): yield mv
+  for mv in generateKingMoves(pos): yield mv
+  for mv in generateCastlingMoves(pos): yield mv
+  
+func generateLegalMoves*(pos: Position): seq[Move] =
+  for mv in generateMoves(pos):
+    if isLegalMove(pos, mv):
+      result.add mv
+
+func perft*(pos: Position, depth: int): int =
+  if depth == 0: return 1
+  for mv in generateMoves(pos):
+    if isLegalMove(pos, mv):
+      result += perft(doMove(pos, mv), depth - 1)

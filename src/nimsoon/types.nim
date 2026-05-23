@@ -19,12 +19,10 @@ func parseSquare*(name: string): Square {.compileTime.} =
 
 iterator squares*(bb: Bitboard): Square =
   ## Returns the square index for each set bit on each iteration
-
   var bits = bb
   while bits != 0:
     let sq = countTrailingZeroBits(bits)
     yield Square(sq)
-
     bits = bits and (bits - 1)
 
 func lsb*(bb: Bitboard): Square {.inline.} =
@@ -32,7 +30,11 @@ func lsb*(bb: Bitboard): Square {.inline.} =
 
 func msb*(bb: Bitboard): Square {.inline.} =
   Square(63 - countLeadingZeroBits(bb))
-    
+
+func shift*(bb: Bitboard, n: int): Bitboard {.inline.} =
+  ## Signed shift: positive moves toward rank 8, negative toward rank 1.
+  if n >= 0: bb shl n else: bb shr (-n)
+
 const
   FullBoard* : Bitboard = 0xFFFFFFFFFFFFFFFF'u64
   Rank1* : Bitboard = 0x00000000000000FF'u64
