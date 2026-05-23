@@ -1,4 +1,4 @@
-import std/bitops
+import std/[bitops, options]
 
 import types, position
 
@@ -193,8 +193,8 @@ iterator generatePawnMoves*(pos: Position): Move {.inline.} =
   yieldPawnPromos(capW  and promoRank,     capWShift,     {mfCapture})
  
   # En passant: same capture logic but targeted at the ep square bitboard
-  if pos.epSquare != 64:
-    let epBB   = Bitboard(1) shl pos.epSquare
+  if pos.epSquare.isSome:
+    let epBB   = Bitboard(1) shl pos.epSquare.get
     let epCapE = shift(pawns and NotFileH, capEShift) and epBB
     let epCapW = shift(pawns and NotFileA, capWShift) and epBB
     yieldPawnMoves(epCapE, capEShift, {mfCapture, mfEp})
@@ -257,7 +257,8 @@ func doMove*(pos: Position, mv: Move): Position =
     result.removePiece(Square(rf), side, ptRook)
     result.placePiece(Square(rt), side, ptRook)
  
-  result.epSquare = if mfDouble in f: Square(to.int + pawnBack) else: Square(64)
+  result.epSquare = block:
+                      if mfDouble in f: some(Square(to.int + pawnBack)) else: none(Square)
  
   result.castlingRights = result.castlingRights * CastlingRightsMask[fr] * CastlingRightsMask[to]
  

@@ -1,4 +1,4 @@
-import std/[unittest, bitops, sequtils]
+import std/[unittest, bitops, sequtils, options]
 import nimsoon/[types, position, fen, moves]
 
 suite "Move Generation":
@@ -51,7 +51,7 @@ suite "Move Generation":
       let pos1 = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
       let move = Move(start: Square(12), finish: Square(28), promotion: ptPawn, flags: {mfDouble})
       let pos2 = doMove(pos1, move)
-      check pos2.epSquare == 20  # en passant square is one rank behind the pawn
+      check pos2.epSquare.get() == 20  # en passant square is one rank behind the pawn
 
   test "Castling kingside white (second test)":
     block:

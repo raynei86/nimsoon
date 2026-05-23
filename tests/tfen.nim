@@ -1,4 +1,4 @@
-import std/[unittest, bitops, sequtils]
+import std/[unittest, bitops, sequtils, options]
 import nimsoon/[fen, types, position]
 
 suite "positionFromFen — starting position":
@@ -62,8 +62,8 @@ suite "positionFromFen — starting position":
     check start.castlingRights == {csWhiteKingside, csWhiteQueenside,
                                    csBlackKingside, csBlackQueenside}
  
-  test "no en passant square (epSquare == 64)":
-    check start.epSquare == 64
+  test "no en passant square":
+    check start.epSquare.isNone
  
   test "halfmove clock is 0":
     check start.halfmoveClock == 0
@@ -116,25 +116,25 @@ suite "positionFromFen — castling rights":
 suite "positionFromFen — en passant square":
   test "no en passant":
     let pos = positionFromFen("8/8/8/8/8/8/8/4K3 w - - 0 1")
-    check pos.epSquare == 64
+    check pos.epSquare.isNone
  
   test "en passant on e3 (square 20)":
     # After 1.e4, ep target is e3
     let pos = positionFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1")
-    check pos.epSquare == 20
+    check pos.epSquare.get() == 20
  
   test "en passant on e6 (square 44)":
     # After 1...e5, ep target is e6
     let pos = positionFromFen("rnbqkbnr/pppp1ppp/8/4p3/8/8/PPPPPPPP/RNBQKBNR w KQkq e6 0 1")
-    check pos.epSquare == 44
+    check pos.epSquare.get() == 44
  
   test "en passant on a6 (square 40)":
     let pos = positionFromFen("rnbqkbnr/1ppppppp/8/p7/8/8/PPPPPPPP/RNBQKBNR w KQkq a6 0 1")
-    check pos.epSquare == 40
+    check pos.epSquare.get() == 40
  
   test "en passant on h3 (square 23)":
     let pos = positionFromFen("rnbqkbnr/ppppppp1/8/8/7P/8/PPPPPPP1/RNBQKBNR b KQkq h3 0 1")
-    check pos.epSquare == 23
+    check pos.epSquare.get() == 23
  
  
 suite "positionFromFen — clocks":

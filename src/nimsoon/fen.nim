@@ -1,4 +1,4 @@
-import std/[strutils, bitops]
+import std/[strutils, bitops, options]
 
 import types
 import position
@@ -71,11 +71,11 @@ func parseCastling(castlingStr: string): CastlingRights =
     of 'q': result.incl(csBlackQueenside)
     else: discard
 
-func parseEpSquare(epStr: string): Square =
-  if epStr == "-": return 64
+func parseEpSquare(epStr: string): Option[Square] =
+  if epStr == "-": return none(Square)
   let file = epStr[0].int - 'a'.int
   let rank = epStr[1].int - '1'.int
-  return rank * 8 + file
+  return some(Square(rank * 8 + file))
 
 func positionFromFen*(fen: string): Position =
   let tokens = fen.splitWhitespace()

@@ -1,4 +1,4 @@
-import std/[bitops]
+import std/[bitops, options]
 
 import types
 
@@ -11,7 +11,7 @@ type
 
     side*: Color
     castlingRights*: CastlingRights
-    epSquare*: Square
+    epSquare*: Option[Square]
     halfmoveClock*: uint8
     fullmoveClock*: uint16
     hash*: HashKey
