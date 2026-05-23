@@ -2,7 +2,7 @@ import std/[bitops]
 
 # Board related types and utils
 type
-  Square* = range[0..64]
+  Square* = range[0..63]
   Rank = range[0..7]
   File = range[0..7]
   Bitboard* = uint64
