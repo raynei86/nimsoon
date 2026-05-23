@@ -12,11 +12,7 @@ type
     promotion*: PieceType
     flags*: MoveFlags
 
-func emitMoves*(source: Square, targets: Bitboard, flags: MoveFlags = {}): seq[Move] =
-  ## Generate moves from a source square to all targets in a bitboard
-  for target in targets.squares:
-    result.add(Move(start: source, finish: target, promotion: ptPawn, flags: flags))
-    
+
 func computeKnightAttacks(): array[64, Bitboard] =
   const offsets = [17, 10, -6, -15, -17, -10, 6, 15]
   
@@ -103,60 +99,61 @@ func bishopAttacks*(sq: int, occupied: Bitboard): Bitboard {.inline.} =
 func queenAttacks*(sq: int, occupied: Bitboard): Bitboard {.inline.} =
   rookAttacks(sq, occupied) or bishopAttacks(sq, occupied)
  
-proc generateKnightMoves*(pos: Position): seq[Move] =
+iterator generateKnightMoves*(pos: Position): Move {.inline.} =
   let friendly = pos.colors[pos.side]
   let enemy    = pos.colors[pos.side.opponent]
   for sq in pos.pieces[pos.side][ptKnight].squares:
     let attacks = KnightAttacks[sq] and not friendly
-    result.add emitMoves(sq, attacks and enemy,     {mfCapture})
-    result.add emitMoves(sq, attacks and not enemy, {})
+    for target in (attacks and enemy).squares:
+      yield Move(start: sq, finish: target, flags: {mfCapture})
+    for target in (attacks and not enemy).squares:
+      yield Move(start: sq, finish: target, flags: {})
  
-proc generateKingMoves*(pos: Position): seq[Move] =
+iterator generateKingMoves*(pos: Position): Move {.inline.} =
   let friendly = pos.colors[pos.side]
   let enemy    = pos.colors[pos.side.opponent]
   for sq in pos.pieces[pos.side][ptKing].squares:
     let attacks = KingAttacks[sq] and not friendly
-    result.add emitMoves(sq, attacks and enemy,     {mfCapture})
-    result.add emitMoves(sq, attacks and not enemy, {})
+    for target in (attacks and enemy).squares:
+      yield Move(start: sq, finish: target, flags: {mfCapture})
+    for target in (attacks and not enemy).squares:
+      yield Move(start: sq, finish: target, flags: {})
+
  
-proc generateRookMoves*(pos: Position): seq[Move] =
+iterator generateRookMoves*(pos: Position): Move {.inline.} =
   let friendly = pos.colors[pos.side]
   let enemy    = pos.colors[pos.side.opponent]
   for sq in pos.pieces[pos.side][ptRook].squares:
     let attacks = rookAttacks(sq, pos.occupied) and not friendly
-    result.add emitMoves(sq, attacks and enemy,     {mfCapture})
-    result.add emitMoves(sq, attacks and not enemy, {})
+    for target in (attacks and enemy).squares:
+      yield Move(start: sq, finish: target, flags: {mfCapture})
+    for target in (attacks and not enemy).squares:
+      yield Move(start: sq, finish: target, flags: {})
+
  
-proc generateBishopMoves*(pos: Position): seq[Move] =
+iterator generateBishopMoves*(pos: Position): Move {.inline.} =
   let friendly = pos.colors[pos.side]
   let enemy    = pos.colors[pos.side.opponent]
   for sq in pos.pieces[pos.side][ptBishop].squares:
     let attacks = bishopAttacks(sq, pos.occupied) and not friendly
-    result.add emitMoves(sq, attacks and enemy,     {mfCapture})
-    result.add emitMoves(sq, attacks and not enemy, {})
+    for target in (attacks and enemy).squares:
+      yield Move(start: sq, finish: target, flags: {mfCapture})
+    for target in (attacks and not enemy).squares:
+      yield Move(start: sq, finish: target, flags: {})
  
-proc generateQueenMoves*(pos: Position): seq[Move] =
+iterator generateQueenMoves*(pos: Position): Move {.inline.} =
   let friendly = pos.colors[pos.side]
   let enemy    = pos.colors[pos.side.opponent]
   for sq in pos.pieces[pos.side][ptQueen].squares:
     let attacks = queenAttacks(sq, pos.occupied) and not friendly
-    result.add emitMoves(sq, attacks and enemy,     {mfCapture})
-    result.add emitMoves(sq, attacks and not enemy, {})
+    for target in (attacks and enemy).squares:
+      yield Move(start: sq, finish: target, flags: {mfCapture})
+    for target in (attacks and not enemy).squares:
+      yield Move(start: sq, finish: target, flags: {})
  
 
 ## Now pawns
-func emitPawnMoves(targets: Bitboard, shiftAmt: int, flags: MoveFlags = {}): seq[Move] =
-  for target in targets.squares:
-    result.add Move(start: Square(target.int - shiftAmt), finish: target,
-                    promotion: ptPawn, flags: flags)
- 
-func emitPawnPromos(targets: Bitboard, shiftAmt: int, flags: MoveFlags = {}): seq[Move] =
-  for target in targets.squares:
-    let src = Square(target.int - shiftAmt)
-    for promo in [ptKnight, ptBishop, ptRook, ptQueen]:
-      result.add Move(start: src, finish: target, promotion: promo, flags: flags)
- 
-proc generatePawnMoves*(pos: Position): seq[Move] =
+iterator generatePawnMoves*(pos: Position): Move {.inline.} =
   let side  = pos.side
   let enemy = pos.colors[side.opponent]
   let empty = not pos.occupied
@@ -169,60 +166,62 @@ proc generatePawnMoves*(pos: Position): seq[Move] =
  
   # Single and double pushes
   let push1 = shift(pawns, pushShift) and empty
-  # Double push: only from the starting rank, through the single-push square
-  let push2 = shift(shift(pawns and startRank, pushShift) and empty,
-                    pushShift) and empty
+  let push2 = shift(shift(pawns and startRank, pushShift) and empty, pushShift) and empty
  
   # Diagonal captures (mask the wrapping file before shifting)
   let capE = shift(pawns and NotFileH, capEShift) and enemy
   let capW = shift(pawns and NotFileA, capWShift) and enemy
+
+  # Local templates allow yielding directly from the iterator's context!
+  template yieldPawnMoves(targets: Bitboard, shiftAmt: int, mFlags: MoveFlags = {}) =
+    for target in targets.squares:
+      yield Move(start: Square(target.int - shiftAmt), finish: target, promotion: ptPawn, flags: mFlags)
+
+  template yieldPawnPromos(targets: Bitboard, shiftAmt: int, mFlags: MoveFlags = {}) =
+    for target in targets.squares:
+      let src = Square(target.int - shiftAmt)
+      for promo in [ptKnight, ptBishop, ptRook, ptQueen]:
+        yield Move(start: src, finish: target, promotion: promo, flags: mFlags)
+
+  yieldPawnMoves( push1 and not promoRank, pushShift)
+  yieldPawnMoves( push2,                   pushShift * 2, {mfDouble})
+  yieldPawnMoves( capE  and not promoRank, capEShift,     {mfCapture})
+  yieldPawnMoves( capW  and not promoRank, capWShift,     {mfCapture})
  
-  result.add emitPawnMoves( push1 and not promoRank, pushShift)
-  result.add emitPawnMoves( push2,                   pushShift * 2, {mfDouble})
-  result.add emitPawnMoves( capE  and not promoRank, capEShift,     {mfCapture})
-  result.add emitPawnMoves( capW  and not promoRank, capWShift,     {mfCapture})
-  result.add emitPawnPromos(push1 and promoRank,     pushShift)
-  result.add emitPawnPromos(capE  and promoRank,     capEShift,     {mfCapture})
-  result.add emitPawnPromos(capW  and promoRank,     capWShift,     {mfCapture})
+  yieldPawnPromos(push1 and promoRank,     pushShift)
+  yieldPawnPromos(capE  and promoRank,     capEShift,     {mfCapture})
+  yieldPawnPromos(capW  and promoRank,     capWShift,     {mfCapture})
  
   # En passant: same capture logic but targeted at the ep square bitboard
   if pos.epSquare != 64:
     let epBB   = Bitboard(1) shl pos.epSquare
     let epCapE = shift(pawns and NotFileH, capEShift) and epBB
     let epCapW = shift(pawns and NotFileA, capWShift) and epBB
-    result.add emitPawnMoves(epCapE, capEShift, {mfCapture, mfEp})
-    result.add emitPawnMoves(epCapW, capWShift, {mfCapture, mfEp})
+    yieldPawnMoves(epCapE, capEShift, {mfCapture, mfEp})
+    yieldPawnMoves(epCapW, capWShift, {mfCapture, mfEp})
  
-const
-  WhiteKingsidePath  = (Bitboard(1) shl  5) or (Bitboard(1) shl  6)
-  WhiteQueensidePath = (Bitboard(1) shl  1) or (Bitboard(1) shl  2) or
-                       (Bitboard(1) shl  3)
-  BlackKingsidePath  = (Bitboard(1) shl 61) or (Bitboard(1) shl 62)
-  BlackQueensidePath = (Bitboard(1) shl 57) or (Bitboard(1) shl 58) or
-                       (Bitboard(1) shl 59)
- 
-proc generateCastlingMoves*(pos: Position): seq[Move] =
+iterator generateCastlingMoves*(pos: Position): Move {.inline.} =
   let rights   = pos.castlingRights
   let occupied = pos.occupied
   if pos.side == White:
     if csWhiteKingside  in rights and (occupied and WhiteKingsidePath) == 0:
-      result.add Move(start: Square(4),  finish: Square(6),  promotion: ptPawn, flags: {mfKingside})
+      yield Move(start: Square(4),  finish: Square(6),  promotion: ptPawn, flags: {mfKingside})
     if csWhiteQueenside in rights and (occupied and WhiteQueensidePath) == 0:
-      result.add Move(start: Square(4),  finish: Square(2),  promotion: ptPawn, flags: {mfQueenside})
+      yield Move(start: Square(4),  finish: Square(2),  promotion: ptPawn, flags: {mfQueenside})
   else:
     if csBlackKingside  in rights and (occupied and BlackKingsidePath) == 0:
-      result.add Move(start: Square(60), finish: Square(62), promotion: ptPawn, flags: {mfKingside})
+      yield Move(start: Square(60), finish: Square(62), promotion: ptPawn, flags: {mfKingside})
     if csBlackQueenside in rights and (occupied and BlackQueensidePath) == 0:
-      result.add Move(start: Square(60), finish: Square(58), promotion: ptPawn, flags: {mfQueenside})
+      yield Move(start: Square(60), finish: Square(58), promotion: ptPawn, flags: {mfQueenside})
  
-proc generateMoves*(pos: Position): seq[Move] =
-  result.add generatePawnMoves(pos)
-  result.add generateKnightMoves(pos)
-  result.add generateBishopMoves(pos)
-  result.add generateRookMoves(pos)
-  result.add generateQueenMoves(pos)
-  result.add generateKingMoves(pos)
-  result.add generateCastlingMoves(pos)
+iterator generateMoves*(pos: Position): Move {.inline.} =
+  for mv in generatePawnMoves(pos): yield mv
+  for mv in generateKnightMoves(pos): yield mv
+  for mv in generateBishopMoves(pos): yield mv
+  for mv in generateRookMoves(pos): yield mv
+  for mv in generateQueenMoves(pos): yield mv
+  for mv in generateKingMoves(pos): yield mv
+  for mv in generateCastlingMoves(pos): yield mv
  
 
 func doMove*(pos: Position, mv: Move): Position =

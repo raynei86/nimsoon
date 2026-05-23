@@ -42,6 +42,10 @@ const
   NotFileA* : Bitboard = 0xFEFEFEFEFEFEFEFE'u64
   NotFileH* : Bitboard = 0x7F7F7F7F7F7F7F7F'u64
 
+  WhiteKingsidePath* : Bitboard = (Bitboard(1) shl 5) or (Bitboard(1) shl 6)   # f1, g1
+  WhiteQueensidePath* : Bitboard = (Bitboard(1) shl 1) or (Bitboard(1) shl 2) or (Bitboard(1) shl 3)  # b1, c1, d1
+  BlackKingsidePath* : Bitboard = (Bitboard(1) shl 61) or (Bitboard(1) shl 62)  # f8, g8
+  BlackQueensidePath* : Bitboard = (Bitboard(1) shl 57) or (Bitboard(1) shl 58) or (Bitboard(1) shl 59)  # b8, c8, d8  
 
 # Pieces related types
 type
@@ -74,8 +78,7 @@ const CastlingRightsMask*: array[64, CastlingRights] = block:
   mask[63] = {csWhiteKingside, csWhiteQueenside, csBlackQueenside}  # h8 - removes black kingside
 
   mask
-
-
+  
 func opponent*(c: Color): Color =
   if c == Color.White:
     Color.Black
