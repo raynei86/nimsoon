@@ -271,7 +271,7 @@ func doMove*(pos: Position, mv: Move): Position =
   result.side = opp
  
  
-func kingInCheck*(pos: Position, color: Color): bool =
+func isKingChecked*(pos: Position, color: Color): bool =
   let kingBB = pos.pieces[color][ptKing]
   if kingBB == 0: return false
   let kSq  = lsb(kingBB)
@@ -295,7 +295,7 @@ func kingInCheck*(pos: Position, color: Color): bool =
   (KingAttacks[kSq]          and pos.pieces[opp][ptKing])   != 0
  
 func isLegalMove*(pos: Position, mv: Move): bool =
-  not kingInCheck(doMove(pos, mv), pos.side)
+  not isKingChecked(doMove(pos, mv), pos.side)
  
 func generateLegalMoves*(pos: Position): seq[Move] =
   for mv in generateMoves(pos):
