@@ -1,2 +1,2 @@
-import nimsoon/[types, position, moves, fen]
+import nimsoon/[types, position, move, fen]
 
