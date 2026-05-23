@@ -1,6 +1,6 @@
 import std/[bitops, options]
 
-import types, position, magics
+import types, position, magic
 
 type
   MoveFlag* = enum
