@@ -81,22 +81,22 @@ func computeRays(): array[Direction, array[64, Bitboard]] =
 
 const Rays*: array[Direction, array[64, Bitboard]] = computeRays()
  
-func rayAttack(sq: int, dir: Direction, occupied: Bitboard): Bitboard {.inline.} =
+func rayAttack(sq: Square, dir: Direction, occupied: Bitboard): Bitboard {.inline.} =
   let ray      = Rays[dir][sq]
   let blockers = ray and occupied
   if blockers == 0: return ray
   let blockSq = if IsPositive[dir]: lsb(blockers) else: msb(blockers)
   ray xor Rays[dir][blockSq]
  
-func rookAttacks*(sq: int, occupied: Bitboard): Bitboard {.inline.} =
+func rookAttacks*(sq: Square, occupied: Bitboard): Bitboard {.inline.} =
   rayAttack(sq, dirN, occupied) or rayAttack(sq, dirE, occupied) or
   rayAttack(sq, dirS, occupied) or rayAttack(sq, dirW, occupied)
  
-func bishopAttacks*(sq: int, occupied: Bitboard): Bitboard {.inline.} =
+func bishopAttacks*(sq: Square, occupied: Bitboard): Bitboard {.inline.} =
   rayAttack(sq, dirNE, occupied) or rayAttack(sq, dirNW, occupied) or
   rayAttack(sq, dirSE, occupied) or rayAttack(sq, dirSW, occupied)
  
-func queenAttacks*(sq: int, occupied: Bitboard): Bitboard {.inline.} =
+func queenAttacks*(sq: Square, occupied: Bitboard): Bitboard {.inline.} =
   rookAttacks(sq, occupied) or bishopAttacks(sq, occupied)
  
 iterator generateKnightMoves*(pos: Position): Move {.inline.} =
