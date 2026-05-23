@@ -39,6 +39,8 @@ const
   Rank2* : Bitboard = 0x000000000000FF00'u64
   Rank7* : Bitboard = 0x00FF000000000000'u64
   Rank8* : Bitboard = 0xFF00000000000000'u64
+  FileA*: Bitboard = 0x0101010101010101'u64
+  FileH*: Bitboard = 0x8080808080808080'u64
   NotFileA* : Bitboard = 0xFEFEFEFEFEFEFEFE'u64
   NotFileH* : Bitboard = 0x7F7F7F7F7F7F7F7F'u64
 

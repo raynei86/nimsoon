@@ -1,5 +1,5 @@
 import std/[unittest, bitops, sequtils, options]
-import nimsoon/[types, position, fen, moves]
+import nimsoon/[types, position, fen, moves, magics]
 
 suite "Move Generation":
 

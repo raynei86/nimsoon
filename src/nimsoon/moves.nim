@@ -1,6 +1,6 @@
 import std/[bitops, options]
 
-import types, position
+import types, position, magics
 
 type
   MoveFlag* = enum
@@ -53,51 +53,6 @@ const KingAttacks*: array[64, Bitboard] = computeKingAttacks()
 func shift(bb: Bitboard, n: int): Bitboard {.inline.} =
   ## Signed shift: positive moves toward rank 8, negative toward rank 1.
   if n >= 0: bb shl n else: bb shr (-n)
-
-  
-## Sliding pieces  
-type Direction* = enum
-  dirN, dirNE, dirE, dirSE, dirS, dirSW, dirW, dirNW
- 
-const DirOffsets: array[Direction, int] = [8, 9, 1, -7, -8, -9, -1, 7]
- 
-# Positive-offset rays use LSB to find the nearest blocker;
-# negative-offset rays use MSB.
-const IsPositive: array[Direction, bool] =
-  [true, true, true, false, false, false, false, true]
- 
-func computeRays(): array[Direction, array[64, Bitboard]] =
-  for dir in Direction:
-    let off = DirOffsets[dir]
-    for sq in 0..63:
-      var cur = sq
-      while true:
-        let nxt = cur + off
-        if nxt notin 0..63: break
-        if abs((nxt and 7) - (cur and 7)) > 1: break
-        result[dir][sq].setBit(nxt)
-        cur = nxt
-
-
-const Rays*: array[Direction, array[64, Bitboard]] = computeRays()
- 
-func rayAttack(sq: Square, dir: Direction, occupied: Bitboard): Bitboard {.inline.} =
-  let ray      = Rays[dir][sq]
-  let blockers = ray and occupied
-  if blockers == 0: return ray
-  let blockSq = if IsPositive[dir]: lsb(blockers) else: msb(blockers)
-  ray xor Rays[dir][blockSq]
- 
-func rookAttacks*(sq: Square, occupied: Bitboard): Bitboard {.inline.} =
-  rayAttack(sq, dirN, occupied) or rayAttack(sq, dirE, occupied) or
-  rayAttack(sq, dirS, occupied) or rayAttack(sq, dirW, occupied)
- 
-func bishopAttacks*(sq: Square, occupied: Bitboard): Bitboard {.inline.} =
-  rayAttack(sq, dirNE, occupied) or rayAttack(sq, dirNW, occupied) or
-  rayAttack(sq, dirSE, occupied) or rayAttack(sq, dirSW, occupied)
- 
-func queenAttacks*(sq: Square, occupied: Bitboard): Bitboard {.inline.} =
-  rookAttacks(sq, occupied) or bishopAttacks(sq, occupied)
  
 iterator generateKnightMoves*(pos: Position): Move {.inline.} =
   let friendly = pos.colors[pos.side]
