@@ -25,7 +25,6 @@ func doMove*(pos: Position, mv: Move): Position =
   let pawnBack = if side == White: -8 else: 8
   var hash = result.hash
 
-  xorSide(hash)
   xorCastling(hash, oldRights)
   xorEp(hash, oldEp)
 
@@ -79,8 +78,8 @@ func doMove*(pos: Position, mv: Move): Position =
 
   result.side = opp
   
-  xorSide(hash)
   xorCastling(hash, result.castlingRights)
   xorEp(hash, result.epSquare)
+  xorSide(hash)
 
   result.hash = hash
