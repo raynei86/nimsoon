@@ -5,9 +5,9 @@ import types
 # The main object representing a chess position
 type
   Position* = object
-    pieces*: array[Color, array[PieceType, Bitboard]]
-    colors*: array[Color, Bitboard]
-    occupied*: Bitboard
+    pieces: array[Color, array[PieceType, Bitboard]]
+    colors: array[Color, Bitboard]
+    occupied: Bitboard
 
     side*: Color
     castlingRights*: CastlingRights
@@ -15,6 +15,11 @@ type
     halfmoveClock*: uint8
     fullmoveClock*: uint16
     hash*: HashKey
+
+# Read-only getters
+func pieces*(pos: Position): Bitboard {.inline.} = pos.pieces
+func colors*(pos: Position): Bitboard {.inline.} = pos.colors
+func occupied*(pos: Position): Bitboard {.inline.} = pos.occupied
 
 func isOccupied*(pos: Position, sq: Square): bool {.inline.} =
   result = testBit(pos.occupied, sq)
