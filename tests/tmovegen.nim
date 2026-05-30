@@ -62,14 +62,12 @@ suite "Move Generation":
 
   test "Bishop attack mask generation":
     block:
-      let pos = positionFromFen("8/8/8/3b4/8/8/8/8 w - - 0 1")
       # Bishop on d5 should have diagonal attacks in all directions
       let attacks = bishopAttacks(parseSquare("d5"), Bitboard(0))
       check attacks != 0
 
   test "Rook attack mask generation":
     block:
-      let pos = positionFromFen("8/8/8/3r4/8/8/8/8 w - - 0 1")
       # Rook on d5 should have orthogonal attacks in all directions
       let attacks = rookAttacks(parseSquare("d5"), Bitboard(0))
       check attacks != 0
@@ -92,6 +90,26 @@ suite "Move Generation":
       let count = perft(pos, 1)
       check count == 20
 
+  test "Perft starting position depth 2":
+    block:
+      let pos = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+      let count = perft(pos, 2)
+      check count == 400
+  test "Perft starting position depth 3":
+    block:
+      let pos = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+      let count = perft(pos, 3)
+      check count == 8902
+  test "Perft starting position depth 4":
+    block:
+      let pos = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+      let count = perft(pos, 4)
+      check count == 197_281
+  test "Perft starting position depth 5":
+    block:
+      let pos = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+      let count = perft(pos, 5)
+      check count == 4_865_609
   test "Move without capture doesn't reset halfmove clock":
     block:
       let pos1 = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 5 3")
