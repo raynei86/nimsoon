@@ -5,12 +5,12 @@ import position
 
 proc fenCharToPiece(ch: char): PieceType =
   case ch.toLowerAscii()
-  of 'p': ptPawn
-  of 'n': ptKnight
-  of 'b': ptBishop
-  of 'r': ptRook
-  of 'q': ptQueen
-  of 'k': ptKing
+  of 'p': Pawn
+  of 'n': Knight
+  of 'b': Bishop
+  of 'r': Rook
+  of 'q': Queen
+  of 'k': King
   else: raise newException(ValueError, "Invalid FEN piece char: " & ch)
 
 func fenCharToColor(ch: char): Color =
@@ -65,10 +65,10 @@ func parseCastling(castlingStr: string): CastlingRights =
   if castlingStr == "-": return CastlingRights({})
   for ch in castlingStr:
     case ch
-    of 'K': result.incl(csWhiteKingside)
-    of 'Q': result.incl(csWhiteQueenside)
-    of 'k': result.incl(csBlackKingside)
-    of 'q': result.incl(csBlackQueenside)
+    of 'K': result.incl(WhiteKingside)
+    of 'Q': result.incl(WhiteQueenside)
+    of 'k': result.incl(BlackKingside)
+    of 'q': result.incl(BlackQueenside)
     else: discard
 
 func parseEpSquare(epStr: string): Option[Square] =
@@ -88,13 +88,12 @@ func positionFromFen*(fen: string): Position =
 
   let layout = parsePlacement(placement)
 
-  return Position(
-    pieces: layout.pieces,
-    colors: layout.byColor,
-    occupied: layout.occupied,
-    side: if side == "w": Color.White else: Color.Black,
-    castlingRights: parseCastling(castling),
-    epSquare: parseEpSquare(ep),
-    halfmoveClock: uint8(parseUInt(halfmove)),
-    fullmoveClock: uint8(parseUInt(fullmove))
-  )
+  result = newPosition(
+    pieces = layout.pieces,
+    colors = layout.byColor,
+    occupied = layout.occupied,
+    side = if side == "w": Color.White else: Color.Black,
+    castlingRights = parseCastling(castling),
+    epSquare = parseEpSquare(ep),
+    halfmoveClock = uint8(parseUInt(halfmove)),
+    fullmoveClock = uint8(parseUInt(fullmove)))

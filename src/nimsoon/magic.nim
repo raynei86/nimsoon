@@ -114,8 +114,8 @@ type
     shift*: int 
 
 ## Getting blockers
-type Direction* = enum
-  dirN, dirNE, dirE, dirSE, dirS, dirSW, dirW, dirNW
+type Direction* {.pure.} = enum
+  N, NE, E, SE, S, SW, W, NW
 
 const
   DirOffsets: array[Direction, int] = [8, 9, 1, -7, -8, -9, -1, 7]
@@ -143,12 +143,12 @@ func rayAttack(sq: Square, dir: Direction, occupied: Bitboard): Bitboard {.inlin
   ray xor Rays[dir][blockSq]
 
 func rookSlowAttacks(sq: Square, occupied: Bitboard): Bitboard {.inline.} =
-  rayAttack(sq, dirN, occupied) or rayAttack(sq, dirE, occupied) or
-  rayAttack(sq, dirS, occupied) or rayAttack(sq, dirW, occupied)
+  rayAttack(sq, N, occupied) or rayAttack(sq, E, occupied) or
+  rayAttack(sq, S, occupied) or rayAttack(sq, W, occupied)
 
 func bishopSlowAttacks(sq: Square, occupied: Bitboard): Bitboard {.inline.} =
-  rayAttack(sq, dirNE, occupied) or rayAttack(sq, dirNW, occupied) or
-  rayAttack(sq, dirSE, occupied) or rayAttack(sq, dirSW, occupied)
+  rayAttack(sq, NE, occupied) or rayAttack(sq, NW, occupied) or
+  rayAttack(sq, SE, occupied) or rayAttack(sq, SW, occupied)
     
 iterator subsets(mask: Bitboard): Bitboard {.inline.} =
   ## Yields all 2^popcount(mask) subsets of mask, starting with 0.

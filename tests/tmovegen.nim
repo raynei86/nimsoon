@@ -33,23 +33,23 @@ suite "Move Generation":
   test "Knight moves do not affect castling rights":
     block:
       let pos1 = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-      check (csWhiteKingside in pos1.castlingRights or csWhiteQueenside in pos1.castlingRights)
+      check (WhiteKingside in pos1.castlingRights or WhiteQueenside in pos1.castlingRights)
 
-      let move = Move(start: Square(1), finish: Square(16), promotion: ptPawn, flags: {})
+      let move = Move(start: Square(1), finish: Square(16), promotion: Pawn, flags: {})
       let pos2 = doMove(pos1, move)
       # Castling rights should be preserved after knight move
-      check (csWhiteKingside in pos2.castlingRights or csWhiteQueenside in pos2.castlingRights)
+      check (WhiteKingside in pos2.castlingRights or WhiteQueenside in pos2.castlingRights)
       let pos1b = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
       check pos1b.side == Color.White
 
-      let move2 = Move(start: Square(12), finish: Square(20), promotion: ptPawn, flags: {})
+      let move2 = Move(start: Square(12), finish: Square(20), promotion: Pawn, flags: {})
       let pos3 = doMove(pos1b, move2)
       check pos3.side == Color.Black
 
   test "En passant square set on double pawn push":
     block:
       let pos1 = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-      let move = Move(start: Square(12), finish: Square(28), promotion: ptPawn, flags: {mfDouble})
+      let move = Move(start: Square(12), finish: Square(28), promotion: Pawn, flags: {Double})
       let pos2 = doMove(pos1, move)
       check pos2.epSquare.get() == 20  # en passant square is one rank behind the pawn
 
@@ -95,7 +95,7 @@ suite "Move Generation":
   test "Move without capture doesn't reset halfmove clock":
     block:
       let pos1 = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 5 3")
-      let move = Move(start: Square(1), finish: Square(16), promotion: ptPawn, flags: {})
+      let move = Move(start: Square(1), finish: Square(16), promotion: Pawn, flags: {})
       let pos2 = doMove(pos1, move)
       check pos2.halfmoveClock == 6
 
@@ -104,18 +104,16 @@ suite "Move Generation":
       let pos1 = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 5 3")
       var pos2 = pos1
       # Place a black pawn on b4 to capture
-      pos2.placePiece(Square(25), Color.Black, ptPawn)
-      pos2.occupied.setBit(25)
-      pos2.colors[Color.Black].setBit(25)
+      pos2.placePiece(Square(25), Color.Black, Pawn)
 
-      let move = Move(start: Square(1), finish: Square(25), promotion: ptPawn, flags: {mfCapture})
+      let move = Move(start: Square(1), finish: Square(25), promotion: Pawn, flags: {Capture})
       let pos3 = doMove(pos2, move)
       check pos3.halfmoveClock == 0
 
   test "Pawn move resets halfmove clock":
     block:
       let pos1 = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 5 3")
-      let move = Move(start: Square(12), finish: Square(20), promotion: ptPawn, flags: {})
+      let move = Move(start: Square(12), finish: Square(20), promotion: Pawn, flags: {})
       let pos2 = doMove(pos1, move)
       check pos2.halfmoveClock == 0
 
@@ -124,10 +122,10 @@ suite "Move Generation":
       let pos1 = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
       check pos1.fullmoveClock == 1
 
-      let move1 = Move(start: Square(12), finish: Square(20), promotion: ptPawn, flags: {})
+      let move1 = Move(start: Square(12), finish: Square(20), promotion: Pawn, flags: {})
       let pos2 = doMove(pos1, move1)
       check pos2.fullmoveClock == 1
 
-      let move2 = Move(start: Square(52), finish: Square(36), promotion: ptPawn, flags: {})
+      let move2 = Move(start: Square(52), finish: Square(36), promotion: Pawn, flags: {})
       let pos3 = doMove(pos2, move2)
       check pos3.fullmoveClock == 2
