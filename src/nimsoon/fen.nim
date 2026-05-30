@@ -2,6 +2,7 @@ import std/[strutils, bitops, options]
 
 import types
 import position
+import zobrist
 
 proc fenCharToPiece(ch: char): PieceType =
   case ch.toLowerAscii()
@@ -97,3 +98,4 @@ func positionFromFen*(fen: string): Position =
     epSquare = parseEpSquare(ep),
     halfmoveClock = uint8(parseUInt(halfmove)),
     fullmoveClock = uint8(parseUInt(fullmove)))
+  result.hash = hashPosition(result)
