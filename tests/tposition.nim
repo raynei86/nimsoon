@@ -77,3 +77,11 @@ suite "colorAt":
     pos.placePiece(parseSquare("h8"), Color.Black, Rook)
     check pos.colorAt(parseSquare("a1")) == Color.White
     check pos.colorAt(parseSquare("h8")) == Color.Black
+
+suite "Position helpers":
+  test "sideToMove returns current side":
+    var pos: Position
+    pos.side = Color.White
+    check pos.sideToMove() == Color.White
+    pos.side = Color.Black
+    check pos.sideToMove() == Color.Black

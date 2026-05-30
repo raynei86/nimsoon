@@ -74,3 +74,6 @@ proc removePiece*(pos: var Position, sq: Square, color: Color, piece: PieceType)
   pos.pieces[color][piece].clearBit(sq)
   pos.colors[color].clearBit(sq)
   pos.occupied.clearBit(sq)
+
+func sideToMove*(pos: Position): Color {.inline.} =
+  pos.side

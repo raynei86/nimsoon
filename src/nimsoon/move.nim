@@ -12,6 +12,21 @@ type
     promotion*: PieceType
     flags*: MoveFlags
 
+func isCapture*(mv: Move): bool {.inline.} =
+  Capture in mv.flags
+
+func isPromotion*(mv: Move): bool {.inline.} =
+  mv.promotion != Pawn
+
+func isCastling*(mv: Move): bool {.inline.} =
+  (Kingside in mv.flags) or (Queenside in mv.flags)
+
+func isEnPassant*(mv: Move): bool {.inline.} =
+  EnPassant in mv.flags
+
+func isDoublePush*(mv: Move): bool {.inline.} =
+  Double in mv.flags
+
 func doMove*(pos: Position, mv: Move): Position =
   result = pos
   let side = pos.side

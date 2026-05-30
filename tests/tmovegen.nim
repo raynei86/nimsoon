@@ -147,3 +147,40 @@ suite "Move Generation":
       let move2 = Move(start: parseSquare("e7"), finish: parseSquare("e5"), promotion: Pawn, flags: {})
       let pos3 = doMove(pos2, move2)
       check pos3.fullmoveClock == 2
+
+suite "Move flag helpers":
+  test "isCapture detects captures":
+    let capture = Move(start: parseSquare("e4"), finish: parseSquare("d5"), promotion: Pawn, flags: {Capture})
+    let quiet = Move(start: parseSquare("e4"), finish: parseSquare("e5"), promotion: Pawn, flags: {})
+    check capture.isCapture() == true
+    check quiet.isCapture() == false
+
+  test "isPromotion detects promotions":
+    let promotion = Move(start: parseSquare("a7"), finish: parseSquare("a8"), promotion: Queen, flags: {})
+    let nonPromotion = Move(start: parseSquare("e4"), finish: parseSquare("e5"), promotion: Pawn, flags: {})
+    check promotion.isPromotion() == true
+    check nonPromotion.isPromotion() == false
+
+  test "isCastling detects kingside castling":
+    let kingside = Move(start: parseSquare("e1"), finish: parseSquare("g1"), promotion: Pawn, flags: {Kingside})
+    let quiet = Move(start: parseSquare("e2"), finish: parseSquare("e4"), promotion: Pawn, flags: {})
+    check kingside.isCastling() == true
+    check quiet.isCastling() == false
+
+  test "isCastling detects queenside castling":
+    let queenside = Move(start: parseSquare("e1"), finish: parseSquare("c1"), promotion: Pawn, flags: {Queenside})
+    let quiet = Move(start: parseSquare("e2"), finish: parseSquare("e4"), promotion: Pawn, flags: {})
+    check queenside.isCastling() == true
+    check quiet.isCastling() == false
+
+  test "isEnPassant detects en passant":
+    let enPassant = Move(start: parseSquare("e5"), finish: parseSquare("d6"), promotion: Pawn, flags: {Capture, EnPassant})
+    let normalCapture = Move(start: parseSquare("e5"), finish: parseSquare("d6"), promotion: Pawn, flags: {Capture})
+    check enPassant.isEnPassant() == true
+    check normalCapture.isEnPassant() == false
+
+  test "isDoublePush detects double pawn push":
+    let doublePush = Move(start: parseSquare("e2"), finish: parseSquare("e4"), promotion: Pawn, flags: {Double})
+    let singlePush = Move(start: parseSquare("e2"), finish: parseSquare("e3"), promotion: Pawn, flags: {})
+    check doublePush.isDoublePush() == true
+    check singlePush.isDoublePush() == false

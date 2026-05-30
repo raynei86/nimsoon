@@ -5,14 +5,14 @@ from nimsoon/types import
   WhiteKingsidePath, WhiteQueensidePath, BlackKingsidePath, BlackQueensidePath
 
 from nimsoon/position import
-  Position, newPosition,
+  Position, newPosition, sideToMove,
   pieces, colors, occupied,
   isOccupied, colorAt, pieceAt, `[]`,
   placePiece, removePiece
 
 from nimsoon/move import
   Move, MoveFlag, MoveFlags,
-  doMove
+  doMove, isCapture, isPromotion, isCastling, isEnPassant, isDoublePush
 
 from nimsoon/fen import
   positionFromFen
@@ -28,9 +28,9 @@ export
   parseSquare, fileOf, rankOf, shift, squares,
   Rank1, Rank2, Rank7, Rank8, FileA, FileH, NotFileA, NotFileH, FullBoard,
   WhiteKingsidePath, WhiteQueensidePath, BlackKingsidePath, BlackQueensidePath,
-  Position, newPosition, pieces, colors, occupied, isOccupied, colorAt, pieceAt, `[]`,
+  Position, newPosition, sideToMove, pieces, colors, occupied, isOccupied, colorAt, pieceAt, `[]`,
   placePiece, removePiece,
-  Move, MoveFlag, MoveFlags, doMove,
+  Move, MoveFlag, MoveFlags, doMove, isCapture, isPromotion, isCastling, isEnPassant, isDoublePush,
   positionFromFen,
   pawnMoves, knightMoves, bishopMoves, rookMoves, queenMoves, kingMoves, castlingMoves,
   pseudoLegalMoves, legalMoves,
