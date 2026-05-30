@@ -210,7 +210,9 @@ proc runUci*(engine: UciEngine) =
       engine.setPosition(currentPos)
     of "go":
       let params = if line.len > 2: parseGoParams(line[2 .. ^1]) else: defaultGoParams()
-      var result = engine.go(params)
+      let result = engine.go(params)
+      for info in result.info:
+        sendInfo(info)
       if result.bestmove.isSome:
         var line = "bestmove " & formatUciMove(result.bestmove.get())
         if result.ponder.isSome:
