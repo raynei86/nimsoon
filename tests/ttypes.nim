@@ -3,24 +3,24 @@ import nimsoon/[types]
 
 suite "fileOf / rankOf":
   test "a1 is file 0, rank 0":
-    check fileOf(0) == 0
-    check rankOf(0) == 0
+    check fileOf(parseSquare("a1")) == 0
+    check rankOf(parseSquare("a1")) == 0
 
   test "h1 is file 7, rank 0":
-    check fileOf(7) == 7
-    check rankOf(7) == 0
+    check fileOf(parseSquare("h1")) == 7
+    check rankOf(parseSquare("h1")) == 0
 
   test "a8 is file 0, rank 7":
-    check fileOf(56) == 0
-    check rankOf(56) == 7
+    check fileOf(parseSquare("a8")) == 0
+    check rankOf(parseSquare("a8")) == 7
 
   test "h8 is file 7, rank 7":
-    check fileOf(63) == 7
-    check rankOf(63) == 7
+    check fileOf(parseSquare("h8")) == 7
+    check rankOf(parseSquare("h8")) == 7
 
   test "e4 (square 28) is file 4, rank 3":
-    check fileOf(28) == 4
-    check rankOf(28) == 3
+    check fileOf(parseSquare("e4")) == 4
+    check rankOf(parseSquare("e4")) == 3
 
   test "all squares: fileOf stays in 0..7":
     for sq in 0..63:
@@ -62,19 +62,19 @@ suite "squares iterator":
     check found.len == 0
 
   test "single bit yields exactly that square":
-    let bb = Bitboard(1) shl 27
+    let bb = Bitboard(1) shl parseSquare("d4")
     var found: seq[Square]
     for sq in bb.squares:
       found.add(sq)
-    check found == @[Square(27)]
+    check found == @[parseSquare("d4")]
 
   test "multiple bits yields all set squares in LSB order":
-    # Set squares 0, 7, 63
-    let bb = Bitboard(1) or (Bitboard(1) shl 7) or (Bitboard(1) shl 63)
+    # Set squares a1, h1, h8
+    let bb = Bitboard(1) or (Bitboard(1) shl parseSquare("h1")) or (Bitboard(1) shl parseSquare("h8"))
     var found: seq[Square]
     for sq in bb.squares:
       found.add(sq)
-    check found == @[Square(0), Square(7), Square(63)]
+    check found == @[parseSquare("a1"), parseSquare("h1"), parseSquare("h8")]
 
   test "full board yields 64 squares":
     var count = 0
@@ -86,15 +86,15 @@ suite "squares iterator":
     var found: seq[Square]
     for sq in Rank1.squares:
       found.add(sq)
-    check found == @[Square(0), Square(1), Square(2), Square(3),
-                     Square(4), Square(5), Square(6), Square(7)]
+    check found == @[parseSquare("a1"), parseSquare("b1"), parseSquare("c1"), parseSquare("d1"),
+                     parseSquare("e1"), parseSquare("f1"), parseSquare("g1"), parseSquare("h1")]
 
   test "rank 8 constant yields squares 56..63":
     var found: seq[Square]
     for sq in Rank8.squares:
       found.add(sq)
-    check found == @[Square(56), Square(57), Square(58), Square(59),
-                     Square(60), Square(61), Square(62), Square(63)]
+    check found == @[parseSquare("a8"), parseSquare("b8"), parseSquare("c8"), parseSquare("d8"),
+                     parseSquare("e8"), parseSquare("f8"), parseSquare("g8"), parseSquare("h8")]
 
 
 suite "bitboard constants":

@@ -1,4 +1,4 @@
-import std/[unittest, bitops, sequtils, options]
+import std/[unittest, sequtils, options]
 import nimsoon/[types, position, fen, move, movegen, magic]
 
 suite "Move Generation":
@@ -35,23 +35,23 @@ suite "Move Generation":
       let pos1 = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
       check (WhiteKingside in pos1.castlingRights or WhiteQueenside in pos1.castlingRights)
 
-      let move = Move(start: Square(1), finish: Square(16), promotion: Pawn, flags: {})
+      let move = Move(start: parseSquare("b1"), finish: parseSquare("a3"), promotion: Pawn, flags: {})
       let pos2 = doMove(pos1, move)
       # Castling rights should be preserved after knight move
       check (WhiteKingside in pos2.castlingRights or WhiteQueenside in pos2.castlingRights)
       let pos1b = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
       check pos1b.side == Color.White
 
-      let move2 = Move(start: Square(12), finish: Square(20), promotion: Pawn, flags: {})
+      let move2 = Move(start: parseSquare("e2"), finish: parseSquare("e3"), promotion: Pawn, flags: {})
       let pos3 = doMove(pos1b, move2)
       check pos3.side == Color.Black
 
   test "En passant square set on double pawn push":
     block:
       let pos1 = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-      let move = Move(start: Square(12), finish: Square(28), promotion: Pawn, flags: {Double})
+      let move = Move(start: parseSquare("e2"), finish: parseSquare("e4"), promotion: Pawn, flags: {Double})
       let pos2 = doMove(pos1, move)
-      check pos2.epSquare.get() == 20  # en passant square is one rank behind the pawn
+      check pos2.epSquare.get() == parseSquare("e3")  # en passant square is one rank behind the pawn
 
   test "Castling kingside white (second test)":
     block:
@@ -64,14 +64,14 @@ suite "Move Generation":
     block:
       let pos = positionFromFen("8/8/8/3b4/8/8/8/8 w - - 0 1")
       # Bishop on d5 should have diagonal attacks in all directions
-      let attacks = bishopAttacks(Square(35), Bitboard(0))
+      let attacks = bishopAttacks(parseSquare("d5"), Bitboard(0))
       check attacks != 0
 
   test "Rook attack mask generation":
     block:
       let pos = positionFromFen("8/8/8/3r4/8/8/8/8 w - - 0 1")
       # Rook on d5 should have orthogonal attacks in all directions
-      let attacks = rookAttacks(Square(35), Bitboard(0))
+      let attacks = rookAttacks(parseSquare("d5"), Bitboard(0))
       check attacks != 0
 
   test "Check detection - pawn check":
@@ -95,7 +95,7 @@ suite "Move Generation":
   test "Move without capture doesn't reset halfmove clock":
     block:
       let pos1 = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 5 3")
-      let move = Move(start: Square(1), finish: Square(16), promotion: Pawn, flags: {})
+      let move = Move(start: parseSquare("b1"), finish: parseSquare("a3"), promotion: Pawn, flags: {})
       let pos2 = doMove(pos1, move)
       check pos2.halfmoveClock == 6
 
@@ -104,16 +104,16 @@ suite "Move Generation":
       let pos1 = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 5 3")
       var pos2 = pos1
       # Place a black pawn on b4 to capture
-      pos2.placePiece(Square(25), Color.Black, Pawn)
+      pos2.placePiece(parseSquare("b4"), Color.Black, Pawn)
 
-      let move = Move(start: Square(1), finish: Square(25), promotion: Pawn, flags: {Capture})
+      let move = Move(start: parseSquare("b1"), finish: parseSquare("b4"), promotion: Pawn, flags: {Capture})
       let pos3 = doMove(pos2, move)
       check pos3.halfmoveClock == 0
 
   test "Pawn move resets halfmove clock":
     block:
       let pos1 = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 5 3")
-      let move = Move(start: Square(12), finish: Square(20), promotion: Pawn, flags: {})
+      let move = Move(start: parseSquare("e2"), finish: parseSquare("e3"), promotion: Pawn, flags: {})
       let pos2 = doMove(pos1, move)
       check pos2.halfmoveClock == 0
 
@@ -122,10 +122,10 @@ suite "Move Generation":
       let pos1 = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
       check pos1.fullmoveClock == 1
 
-      let move1 = Move(start: Square(12), finish: Square(20), promotion: Pawn, flags: {})
+      let move1 = Move(start: parseSquare("e2"), finish: parseSquare("e3"), promotion: Pawn, flags: {})
       let pos2 = doMove(pos1, move1)
       check pos2.fullmoveClock == 1
 
-      let move2 = Move(start: Square(52), finish: Square(36), promotion: Pawn, flags: {})
+      let move2 = Move(start: parseSquare("e7"), finish: parseSquare("e5"), promotion: Pawn, flags: {})
       let pos3 = doMove(pos2, move2)
       check pos3.fullmoveClock == 2

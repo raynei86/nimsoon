@@ -14,30 +14,30 @@ suite "zobrist hashing":
 
   test "incremental hash matches recompute after quiet move":
     let pos = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-    let mv = Move(start: Square(12), finish: Square(28), promotion: Pawn, flags: {}) # e2e4
+    let mv = Move(start: parseSquare("e2"), finish: parseSquare("e4"), promotion: Pawn, flags: {})
     let next = doMove(pos, mv)
     check next.hash == hashPosition(next)
 
   test "incremental hash matches recompute after capture":
     let pos = positionFromFen("8/8/8/3p4/4P3/8/8/4K3 w - - 0 1")
-    let mv = Move(start: Square(28), finish: Square(35), promotion: Pawn, flags: {Capture}) # e4xd5
+    let mv = Move(start: parseSquare("e4"), finish: parseSquare("d5"), promotion: Pawn, flags: {Capture})
     let next = doMove(pos, mv)
     check next.hash == hashPosition(next)
 
   test "incremental hash matches recompute after en passant":
     let pos = positionFromFen("8/8/8/3pP3/8/8/8/4K3 w - d6 0 1")
-    let mv = Move(start: Square(36), finish: Square(43), promotion: Pawn, flags: {Capture, EnPassant})
+    let mv = Move(start: parseSquare("e5"), finish: parseSquare("d6"), promotion: Pawn, flags: {Capture, EnPassant})
     let next = doMove(pos, mv)
     check next.hash == hashPosition(next)
 
   test "incremental hash matches recompute after castling":
     let pos = positionFromFen("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1")
-    let mv = Move(start: Square(4), finish: Square(6), promotion: Pawn, flags: {Kingside})
+    let mv = Move(start: parseSquare("e1"), finish: parseSquare("g1"), promotion: Pawn, flags: {Kingside})
     let next = doMove(pos, mv)
     check next.hash == hashPosition(next)
 
   test "incremental hash matches recompute after promotion":
     let pos = positionFromFen("4k3/P7/8/8/8/8/8/4K3 w - - 0 1")
-    let mv = Move(start: Square(48), finish: Square(56), promotion: Queen, flags: {})
+    let mv = Move(start: parseSquare("a7"), finish: parseSquare("a8"), promotion: Queen, flags: {})
     let next = doMove(pos, mv)
     check next.hash == hashPosition(next)

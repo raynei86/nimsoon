@@ -15,7 +15,7 @@ type
 func fileOf*(sq: Square): File {.inline.} = File(sq and 7)
 func rankOf*(sq: Square): Rank {.inline.} = Rank(sq shr 3)
 
-func parseSquare*(name: string): Square {.compileTime.} =
+func parseSquare*(name: string): Square =
   let
     f = int(name[0]) - int('a')
     r = int(name[1]) - int('1')

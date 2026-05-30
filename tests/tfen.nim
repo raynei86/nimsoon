@@ -20,40 +20,40 @@ suite "positionFromFen — starting position":
       check start.isOccupied(sq) == false
  
   test "white king is on e1 (square 4)":
-    check testBit(start.pieces[Color.White][King], 4) == true
+    check testBit(start.pieces[Color.White][King], parseSquare("e1")) == true
  
   test "black king is on e8 (square 60)":
-    check testBit(start.pieces[Color.Black][King], 60) == true
+    check testBit(start.pieces[Color.Black][King], parseSquare("e8")) == true
  
   test "white queen is on d1 (square 3)":
-    check testBit(start.pieces[Color.White][Queen], 3) == true
+    check testBit(start.pieces[Color.White][Queen], parseSquare("d1")) == true
  
   test "black queen is on d8 (square 59)":
-    check testBit(start.pieces[Color.Black][Queen], 59) == true
+    check testBit(start.pieces[Color.Black][Queen], parseSquare("d8")) == true
  
   test "white rooks are on a1 and h1 (squares 0 and 7)":
-    check testBit(start.pieces[Color.White][Rook], 0) == true
-    check testBit(start.pieces[Color.White][Rook], 7) == true
+    check testBit(start.pieces[Color.White][Rook], parseSquare("a1")) == true
+    check testBit(start.pieces[Color.White][Rook], parseSquare("h1")) == true
  
   test "black rooks are on a8 and h8 (squares 56 and 63)":
-    check testBit(start.pieces[Color.Black][Rook], 56) == true
-    check testBit(start.pieces[Color.Black][Rook], 63) == true
+    check testBit(start.pieces[Color.Black][Rook], parseSquare("a8")) == true
+    check testBit(start.pieces[Color.Black][Rook], parseSquare("h8")) == true
  
   test "white knights are on b1 and g1 (squares 1 and 6)":
-    check testBit(start.pieces[Color.White][Knight], 1) == true
-    check testBit(start.pieces[Color.White][Knight], 6) == true
+    check testBit(start.pieces[Color.White][Knight], parseSquare("b1")) == true
+    check testBit(start.pieces[Color.White][Knight], parseSquare("g1")) == true
  
   test "black knights are on b8 and g8 (squares 57 and 62)":
-    check testBit(start.pieces[Color.Black][Knight], 57) == true
-    check testBit(start.pieces[Color.Black][Knight], 62) == true
+    check testBit(start.pieces[Color.Black][Knight], parseSquare("b8")) == true
+    check testBit(start.pieces[Color.Black][Knight], parseSquare("g8")) == true
  
   test "white bishops are on c1 and f1 (squares 2 and 5)":
-    check testBit(start.pieces[Color.White][Bishop], 2) == true
-    check testBit(start.pieces[Color.White][Bishop], 5) == true
+    check testBit(start.pieces[Color.White][Bishop], parseSquare("c1")) == true
+    check testBit(start.pieces[Color.White][Bishop], parseSquare("f1")) == true
  
   test "black bishops are on c8 and f8 (squares 58 and 61)":
-    check testBit(start.pieces[Color.Black][Bishop], 58) == true
-    check testBit(start.pieces[Color.Black][Bishop], 61) == true
+    check testBit(start.pieces[Color.Black][Bishop], parseSquare("c8")) == true
+    check testBit(start.pieces[Color.Black][Bishop], parseSquare("f8")) == true
  
   test "side to move is Color.White":
     check start.side == Color.White
@@ -121,20 +121,20 @@ suite "positionFromFen — en passant square":
   test "en passant on e3 (square 20)":
     # After 1.e4, ep target is e3
     let pos = positionFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1")
-    check pos.epSquare.get() == 20
+    check pos.epSquare.get() == parseSquare("e3")
  
   test "en passant on e6 (square 44)":
     # After 1...e5, ep target is e6
     let pos = positionFromFen("rnbqkbnr/pppp1ppp/8/4p3/8/8/PPPPPPPP/RNBQKBNR w KQkq e6 0 1")
-    check pos.epSquare.get() == 44
+    check pos.epSquare.get() == parseSquare("e6")
  
   test "en passant on a6 (square 40)":
     let pos = positionFromFen("rnbqkbnr/1ppppppp/8/p7/8/8/PPPPPPPP/RNBQKBNR w KQkq a6 0 1")
-    check pos.epSquare.get() == 40
+    check pos.epSquare.get() == parseSquare("a6")
  
   test "en passant on h3 (square 23)":
     let pos = positionFromFen("rnbqkbnr/ppppppp1/8/8/7P/8/PPPPPPP1/RNBQKBNR b KQkq h3 0 1")
-    check pos.epSquare.get() == 23
+    check pos.epSquare.get() == parseSquare("h3")
  
  
 suite "positionFromFen — clocks":
@@ -153,14 +153,14 @@ suite "positionFromFen — piece placement edge cases":
   test "empty board (only kings)":
     let pos = positionFromFen("4k3/8/8/8/8/8/8/4K3 w - - 0 1")
     check countSetBits(pos.occupied) == 2
-    check testBit(pos.pieces[Color.White][King], 4)  == true
-    check testBit(pos.pieces[Color.Black][King], 60) == true
+    check testBit(pos.pieces[Color.White][King], parseSquare("e1"))  == true
+    check testBit(pos.pieces[Color.Black][King], parseSquare("e8")) == true
  
   test "FEN with digit runs spanning a full rank":
     # Rank of 8 empty squares
     let pos = positionFromFen("8/8/8/8/8/8/8/4K3 w - - 0 1")
     for sq in 8..63:
-      if sq != 4:
+      if sq != parseSquare("e1"):
         check pos.isOccupied(sq) == false
  
   test "known midgame position has correct piece count":
