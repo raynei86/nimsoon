@@ -1,6 +1,10 @@
 import std/[bitops]
 
-# Board related types and utils
+
+# ===============================================================================
+# BOARD TYPES & UTILITIES
+# ===============================================================================
+
 type
   Square* = range[0..63]
   Rank = range[0..7]
@@ -46,44 +50,50 @@ const
   NotFileA* : Bitboard = 0xFEFEFEFEFEFEFEFE'u64
   NotFileH* : Bitboard = 0x7F7F7F7F7F7F7F7F'u64
 
-  WhiteKingsidePath* : Bitboard = (Bitboard(1) shl 5) or (Bitboard(1) shl 6)   # f1, g1
-  WhiteQueensidePath* : Bitboard = (Bitboard(1) shl 1) or (Bitboard(1) shl 2) or (Bitboard(1) shl 3)  # b1, c1, d1
-  BlackKingsidePath* : Bitboard = (Bitboard(1) shl 61) or (Bitboard(1) shl 62)  # f8, g8
-  BlackQueensidePath* : Bitboard = (Bitboard(1) shl 57) or (Bitboard(1) shl 58) or (Bitboard(1) shl 59)  # b8, c8, d8  
+  WhiteKingsidePath* : Bitboard = (1'u64 shl 5) or (1'u64 shl 6)   # f1, g1
+  WhiteQueensidePath* : Bitboard = (1'u64 shl 1) or (1'u64 shl 2) or (1'u64 shl 3)  # b1, c1, d1
+  BlackKingsidePath* : Bitboard = (1'u64 shl 61) or (1'u64 shl 62)  # f8, g8
+  BlackQueensidePath* : Bitboard = (1'u64 shl 57) or (1'u64 shl 58) or (1'u64 shl 59)  # b8, c8, d8
 
-# Pieces related types
+# ===============================================================================
+# PIECE TYPES & UTILITIES
+# ===============================================================================
+
 type
   Color* {.pure.} = enum 
     White, Black
-  PieceType* = enum
-    ptPawn, ptKnight, ptBishop, ptRook, ptQueen, ptKing
-  CastlingSide* = enum
-    csWhiteKingside, csWhiteQueenside, csBlackKingside, csBlackQueenside
+  PieceType* {.pure.} = enum
+    Pawn, Knight, Bishop, Rook, Queen, King
+  ColoredPiece* = object
+    color*: Color
+    kind*: PieceType
+  CastlingSide* {.pure.} = enum
+    WhiteKingside, WhiteQueenside, BlackKingside, BlackQueenside
   CastlingRights* = set[CastlingSide]
 
 const CastlingRightsMask*: array[64, CastlingRights] = block:
   var mask: array[64, CastlingRights]
   # Initialize all squares with full rights (no restriction)
   for i in 0..63:
-    mask[i] = {csWhiteKingside, csWhiteQueenside, csBlackKingside, csBlackQueenside}
+    mask[i] = {WhiteKingside, WhiteQueenside, BlackKingside, BlackQueenside}
 
   # White king on e1 - removes both white castling rights
-  mask[4] = {csBlackKingside, csBlackQueenside}
+  mask[4] = {BlackKingside, BlackQueenside}
 
   # Black king on e8 - removes both black castling rights
-  mask[60] = {csWhiteKingside, csWhiteQueenside}
+  mask[60] = {WhiteKingside, WhiteQueenside}
 
   # White rooks
-  mask[0] = {csWhiteKingside, csBlackKingside, csBlackQueenside}  # a1 - removes white queenside
-  mask[7] = {csWhiteQueenside, csBlackKingside, csBlackQueenside}  # h1 - removes white kingside
+  mask[0] = {WhiteKingside, BlackKingside, BlackQueenside}  # a1 - removes white queenside
+  mask[7] = {WhiteQueenside, BlackKingside, BlackQueenside}  # h1 - removes white kingside
 
   # Black rooks
-  mask[56] = {csWhiteKingside, csWhiteQueenside, csBlackKingside}  # a8 - removes black queenside
-  mask[63] = {csWhiteKingside, csWhiteQueenside, csBlackQueenside}  # h8 - removes black kingside
+  mask[56] = {WhiteKingside, WhiteQueenside, BlackKingside}  # a8 - removes black queenside
+  mask[63] = {WhiteKingside, WhiteQueenside, BlackQueenside}  # h8 - removes black kingside
 
   mask
-  
-func opponent*(c: Color): Color =
+
+func opponent*(c: Color): Color {.inline.} =
   if c == Color.White:
     Color.Black
   else:

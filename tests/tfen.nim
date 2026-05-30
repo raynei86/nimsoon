@@ -9,58 +9,58 @@ suite "positionFromFen — starting position":
  
   test "white pawns occupy rank 2 (squares 8–15)":
     for sq in 8..15:
-      check testBit(start.pieces[Color.White][ptPawn], sq) == true
+      check testBit(start.pieces[Color.White][Pawn], sq) == true
  
   test "black pawns occupy rank 7 (squares 48–55)":
     for sq in 48..55:
-      check testBit(start.pieces[Color.Black][ptPawn], sq) == true
+      check testBit(start.pieces[Color.Black][Pawn], sq) == true
  
   test "ranks 3–6 are empty":
     for sq in 16..47:
       check start.isOccupied(sq) == false
  
   test "white king is on e1 (square 4)":
-    check testBit(start.pieces[Color.White][ptKing], 4) == true
+    check testBit(start.pieces[Color.White][King], 4) == true
  
   test "black king is on e8 (square 60)":
-    check testBit(start.pieces[Color.Black][ptKing], 60) == true
+    check testBit(start.pieces[Color.Black][King], 60) == true
  
   test "white queen is on d1 (square 3)":
-    check testBit(start.pieces[Color.White][ptQueen], 3) == true
+    check testBit(start.pieces[Color.White][Queen], 3) == true
  
   test "black queen is on d8 (square 59)":
-    check testBit(start.pieces[Color.Black][ptQueen], 59) == true
+    check testBit(start.pieces[Color.Black][Queen], 59) == true
  
   test "white rooks are on a1 and h1 (squares 0 and 7)":
-    check testBit(start.pieces[Color.White][ptRook], 0) == true
-    check testBit(start.pieces[Color.White][ptRook], 7) == true
+    check testBit(start.pieces[Color.White][Rook], 0) == true
+    check testBit(start.pieces[Color.White][Rook], 7) == true
  
   test "black rooks are on a8 and h8 (squares 56 and 63)":
-    check testBit(start.pieces[Color.Black][ptRook], 56) == true
-    check testBit(start.pieces[Color.Black][ptRook], 63) == true
+    check testBit(start.pieces[Color.Black][Rook], 56) == true
+    check testBit(start.pieces[Color.Black][Rook], 63) == true
  
   test "white knights are on b1 and g1 (squares 1 and 6)":
-    check testBit(start.pieces[Color.White][ptKnight], 1) == true
-    check testBit(start.pieces[Color.White][ptKnight], 6) == true
+    check testBit(start.pieces[Color.White][Knight], 1) == true
+    check testBit(start.pieces[Color.White][Knight], 6) == true
  
   test "black knights are on b8 and g8 (squares 57 and 62)":
-    check testBit(start.pieces[Color.Black][ptKnight], 57) == true
-    check testBit(start.pieces[Color.Black][ptKnight], 62) == true
+    check testBit(start.pieces[Color.Black][Knight], 57) == true
+    check testBit(start.pieces[Color.Black][Knight], 62) == true
  
   test "white bishops are on c1 and f1 (squares 2 and 5)":
-    check testBit(start.pieces[Color.White][ptBishop], 2) == true
-    check testBit(start.pieces[Color.White][ptBishop], 5) == true
+    check testBit(start.pieces[Color.White][Bishop], 2) == true
+    check testBit(start.pieces[Color.White][Bishop], 5) == true
  
   test "black bishops are on c8 and f8 (squares 58 and 61)":
-    check testBit(start.pieces[Color.Black][ptBishop], 58) == true
-    check testBit(start.pieces[Color.Black][ptBishop], 61) == true
+    check testBit(start.pieces[Color.Black][Bishop], 58) == true
+    check testBit(start.pieces[Color.Black][Bishop], 61) == true
  
   test "side to move is Color.White":
     check start.side == Color.White
  
   test "all four castling rights are set":
-    check start.castlingRights == {csWhiteKingside, csWhiteQueenside,
-                                   csBlackKingside, csBlackQueenside}
+    check start.castlingRights == {WhiteKingside, WhiteQueenside,
+                                   BlackKingside, BlackQueenside}
  
   test "no en passant square":
     check start.epSquare.isNone
@@ -89,28 +89,28 @@ suite "positionFromFen — castling rights":
  
   test "white kingside only":
     let pos = positionFromFen("r3k2r/8/8/8/8/8/8/R3K2R w K - 0 1")
-    check pos.castlingRights == {csWhiteKingside}
+    check pos.castlingRights == {WhiteKingside}
  
   test "white queenside only":
     let pos = positionFromFen("r3k2r/8/8/8/8/8/8/R3K2R w Q - 0 1")
-    check pos.castlingRights == {csWhiteQueenside}
+    check pos.castlingRights == {WhiteQueenside}
  
   test "black kingside only":
     let pos = positionFromFen("r3k2r/8/8/8/8/8/8/R3K2R w k - 0 1")
-    check pos.castlingRights == {csBlackKingside}
+    check pos.castlingRights == {BlackKingside}
  
   test "black queenside only":
     let pos = positionFromFen("r3k2r/8/8/8/8/8/8/R3K2R w q - 0 1")
-    check pos.castlingRights == {csBlackQueenside}
+    check pos.castlingRights == {BlackQueenside}
  
   test "white both sides":
     let pos = positionFromFen("r3k2r/8/8/8/8/8/8/R3K2R w KQ - 0 1")
-    check pos.castlingRights == {csWhiteKingside, csWhiteQueenside}
+    check pos.castlingRights == {WhiteKingside, WhiteQueenside}
  
   test "all four rights":
     let pos = positionFromFen("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1")
-    check pos.castlingRights == {csWhiteKingside, csWhiteQueenside,
-                                 csBlackKingside, csBlackQueenside}
+    check pos.castlingRights == {WhiteKingside, WhiteQueenside,
+                                 BlackKingside, BlackQueenside}
  
  
 suite "positionFromFen — en passant square":
@@ -153,8 +153,8 @@ suite "positionFromFen — piece placement edge cases":
   test "empty board (only kings)":
     let pos = positionFromFen("4k3/8/8/8/8/8/8/4K3 w - - 0 1")
     check countSetBits(pos.occupied) == 2
-    check testBit(pos.pieces[Color.White][ptKing], 4)  == true
-    check testBit(pos.pieces[Color.Black][ptKing], 60) == true
+    check testBit(pos.pieces[Color.White][King], 4)  == true
+    check testBit(pos.pieces[Color.Black][King], 60) == true
  
   test "FEN with digit runs spanning a full rank":
     # Rank of 8 empty squares

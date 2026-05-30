@@ -16,13 +16,35 @@ type
     fullmoveClock*: uint16
     hash*: HashKey
 
-# Read-only getters
-func pieces*(pos: Position): Bitboard {.inline.} = pos.pieces
-func colors*(pos: Position): Bitboard {.inline.} = pos.colors
+func newPosition*(
+    pieces: array[Color, array[PieceType, Bitboard]],
+    colors: array[Color, Bitboard],
+    occupied: Bitboard,
+    side: Color = Color.White,
+    castlingRights: CastlingRights = {WhiteKingside, WhiteQueenside, BlackKingside, BlackQueenside},
+    epSquare: Option[Square] = none(Square),
+    halfmoveClock: uint8 = 0,
+    fullmoveClock: uint16 = 0,
+    hash: HashKey = 0
+): Position =
+  Position(
+    pieces: pieces,
+    colors: colors,
+    occupied: occupied,
+    side: side,
+    castlingRights: castlingRights,
+    epSquare: epSquare,
+    halfmoveClock: halfmoveClock,
+    fullmoveClock: fullmoveClock,
+    hash: hash
+  )
+
+func pieces*(pos: Position): array[Color, array[PieceType, Bitboard]] {.inline.} = pos.pieces
+func colors*(pos: Position): array[Color, Bitboard] {.inline.} = pos.colors
 func occupied*(pos: Position): Bitboard {.inline.} = pos.occupied
 
 func isOccupied*(pos: Position, sq: Square): bool {.inline.} =
-  result = testBit(pos.occupied, sq)
+  pos.occupied.testBit(sq)
 
 func colorAt*(pos: Position, sq: Square): Color {.inline.} =
   ## Assumes square is occupied
@@ -32,13 +54,16 @@ func colorAt*(pos: Position, sq: Square): Color {.inline.} =
 
 func pieceAt*(pos: Position, sq: Square): PieceType {.inline.} =
   ## Assumes square is occupied
-  for piece in ptPawn..ptKing:
+  for piece in Pawn..King:
     let combinedBB = pos.pieces[White][piece] or pos.pieces[Black][piece]
 
     if combinedBB.testBit(sq):
       return piece
 
   assert false, "pieceAt called on an empty square" & $sq
+
+func `[]`*(pos: Position, sq: Square): ColoredPiece =
+  ColoredPiece(color: pos.colorAt(sq), kind: pos.pieceAt(sq))
 
 proc placePiece*(pos: var Position, sq: Square, color: Color, piece: PieceType) =
   pos.pieces[color][piece].setBit(sq)
