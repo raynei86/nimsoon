@@ -17,12 +17,12 @@ type
     hash*: HashKey
 
 # Read-only getters
-func pieces*(pos: Position): Bitboard {.inline.} = pos.pieces
-func colors*(pos: Position): Bitboard {.inline.} = pos.colors
+func pieces*(pos: Position): array[Color, array[PieceType, Bitboard]] {.inline.} = pos.pieces
+func colors*(pos: Position): array[Color, Bitboard] {.inline.} = pos.colors
 func occupied*(pos: Position): Bitboard {.inline.} = pos.occupied
 
 func isOccupied*(pos: Position, sq: Square): bool {.inline.} =
-  result = testBit(pos.occupied, sq)
+  pos.occupied.testBit(sq)
 
 func colorAt*(pos: Position, sq: Square): Color {.inline.} =
   ## Assumes square is occupied
@@ -39,6 +39,9 @@ func pieceAt*(pos: Position, sq: Square): PieceType {.inline.} =
       return piece
 
   assert false, "pieceAt called on an empty square" & $sq
+
+func `[]`*(pos: Position, sq: Square): ColoredPiece =
+  ColoredPiece(color: pos.colorAt(sq), kind: pos.pieceAt(sq))
 
 proc placePiece*(pos: var Position, sq: Square, color: Color, piece: PieceType) =
   pos.pieces[color][piece].setBit(sq)
