@@ -16,7 +16,7 @@ method setPosition*(engine: TestEngine, pos: Position) =
   engine.pos = pos
 
 method go*(engine: TestEngine, params: GoParams): UciResult =
-  for mv in generateMoves(engine.pos):
+  for mv in pseudoLegalMoves(engine.pos):
     return UciResult(bestmove: some(mv))
   UciResult(bestmove: none(Move))
 

@@ -38,7 +38,7 @@ func computeKingAttacks(): array[64, Bitboard] =
 const KnightAttacks*: array[64, Bitboard] = computeKnightAttacks()
 const KingAttacks*: array[64, Bitboard] = computeKingAttacks()
 
-iterator generateKnightMoves*(pos: Position): Move {.inline.} =
+iterator knightMoves*(pos: Position): Move {.inline.} =
   let friendly = pos.colors[pos.side]
   let enemy    = pos.colors[pos.side.opponent]
   for sq in pos.pieces[pos.side][Knight].squares:
@@ -48,7 +48,7 @@ iterator generateKnightMoves*(pos: Position): Move {.inline.} =
     for target in (attacks and not enemy).squares:
       yield Move(start: sq, finish: target, flags: {})
  
-iterator generateKingMoves*(pos: Position): Move {.inline.} =
+iterator kingMoves*(pos: Position): Move {.inline.} =
   let friendly = pos.colors[pos.side]
   let enemy    = pos.colors[pos.side.opponent]
   for sq in pos.pieces[pos.side][King].squares:
@@ -58,7 +58,7 @@ iterator generateKingMoves*(pos: Position): Move {.inline.} =
     for target in (attacks and not enemy).squares:
       yield Move(start: sq, finish: target, flags: {})
  
-iterator generateRookMoves*(pos: Position): Move {.inline.} =
+iterator rookMoves*(pos: Position): Move {.inline.} =
   let friendly = pos.colors[pos.side]
   let enemy    = pos.colors[pos.side.opponent]
   for sq in pos.pieces[pos.side][Rook].squares:
@@ -69,7 +69,7 @@ iterator generateRookMoves*(pos: Position): Move {.inline.} =
       yield Move(start: sq, finish: target, flags: {})
 
  
-iterator generateBishopMoves*(pos: Position): Move {.inline.} =
+iterator bishopMoves*(pos: Position): Move {.inline.} =
   let friendly = pos.colors[pos.side]
   let enemy    = pos.colors[pos.side.opponent]
   for sq in pos.pieces[pos.side][Bishop].squares:
@@ -79,7 +79,7 @@ iterator generateBishopMoves*(pos: Position): Move {.inline.} =
     for target in (attacks and not enemy).squares:
       yield Move(start: sq, finish: target, flags: {})
  
-iterator generateQueenMoves*(pos: Position): Move {.inline.} =
+iterator queenMoves*(pos: Position): Move {.inline.} =
   let friendly = pos.colors[pos.side]
   let enemy    = pos.colors[pos.side.opponent]
   for sq in pos.pieces[pos.side][Queen].squares:
@@ -91,7 +91,7 @@ iterator generateQueenMoves*(pos: Position): Move {.inline.} =
  
 
 ## Now pawns
-iterator generatePawnMoves*(pos: Position): Move {.inline.} =
+iterator pawnMoves*(pos: Position): Move {.inline.} =
   let side  = pos.side
   let enemy = pos.colors[side.opponent]
   let empty = not pos.occupied
@@ -138,7 +138,7 @@ iterator generatePawnMoves*(pos: Position): Move {.inline.} =
     yieldPawnMoves(epCapE, capEShift, {Capture, EnPassant})
     yieldPawnMoves(epCapW, capWShift, {Capture, EnPassant})
  
-iterator generateCastlingMoves*(pos: Position): Move {.inline.} =
+iterator castlingMoves*(pos: Position): Move {.inline.} =
   let rights   = pos.castlingRights
   let occupied = pos.occupied
   if pos.side == White:
@@ -178,22 +178,31 @@ func isKingChecked*(pos: Position, color: Color): bool =
 func isLegalMove*(pos: Position, mv: Move): bool =
   not isKingChecked(doMove(pos, mv), pos.side)
 
-iterator generateMoves*(pos: Position): Move {.inline.} =
-  for mv in generatePawnMoves(pos): yield mv
-  for mv in generateKnightMoves(pos): yield mv
-  for mv in generateBishopMoves(pos): yield mv
-  for mv in generateRookMoves(pos): yield mv
-  for mv in generateQueenMoves(pos): yield mv
-  for mv in generateKingMoves(pos): yield mv
-  for mv in generateCastlingMoves(pos): yield mv
-  
-func generateLegalMoves*(pos: Position): seq[Move] =
-  for mv in generateMoves(pos):
+iterator pseudoLegalMoves*(pos: Position): Move {.inline.} =
+  for mv in pawnMoves(pos): yield mv
+  for mv in knightMoves(pos): yield mv
+  for mv in bishopMoves(pos): yield mv
+  for mv in rookMoves(pos): yield mv
+  for mv in queenMoves(pos): yield mv
+  for mv in kingMoves(pos): yield mv
+  for mv in castlingMoves(pos): yield mv
+
+iterator legalMoves*(pos: Position): Move {.inline.} =
+  for mv in pos.pseudoLegalMoves:
     if isLegalMove(pos, mv):
-      result.add mv
+      yield mv
+
+iterator quietMoves*(pos: Position): Move {.inline.} =
+  for mv in pos.pseudoLegalMoves:
+    if Capture notin mv.flags:
+      yield mv
+
+iterator captureMoves*(pos: Position): Move {.inline.} =
+  for mv in pos.pseudoLegalMoves:
+    if Capture in mv.flags:
+      yield mv
 
 func perft*(pos: Position, depth: int): int =
   if depth == 0: return 1
-  for mv in generateMoves(pos):
-    if isLegalMove(pos, mv):
-      result += perft(doMove(pos, mv), depth - 1)
+  for mv in pos.legalMoves:
+    result += perft(doMove(pos, mv), depth - 1)

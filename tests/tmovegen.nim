@@ -6,27 +6,27 @@ suite "Move Generation":
   test "Starting position has correct move count":
     block:
       let pos = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-      let moves = toSeq(generateMoves(pos))
+      let moves = toSeq(pseudoLegalMoves(pos))
       check moves.len == 20  # Standard chess starting position has 20 pseudo-legal moves
 
   test "Pawn moves from starting position":
     block:
       let pos = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-      let pawnMoves = toSeq(generatePawnMoves(pos))
+      let pawnMoves = toSeq(pawnMoves(pos))
       # 8 pawns × 2 moves each (single push or double push)
       check pawnMoves.len == 16
 
   test "Knight moves from starting position":
     block:
       let pos = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-      let knightMoves = toSeq(generateKnightMoves(pos))
+      let knightMoves = toSeq(knightMoves(pos))
       # 2 knights × 2 moves each
       check knightMoves.len == 4
 
   test "Castling kingside white":
     block:
       let pos1 = positionFromFen("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1")
-      let castlingMoves = toSeq(generateCastlingMoves(pos1))
+      let castlingMoves = toSeq(castlingMoves(pos1))
       # White can castle kingside and queenside
       check castlingMoves.len == 2
 
@@ -56,7 +56,7 @@ suite "Move Generation":
   test "Castling kingside white (second test)":
     block:
       let pos1 = positionFromFen("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1")
-      let castlingMoves = toSeq(generateCastlingMoves(pos1))
+      let castlingMoves = toSeq(castlingMoves(pos1))
       # White can castle kingside and queenside
       check castlingMoves.len == 2
 
