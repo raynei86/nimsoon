@@ -3,7 +3,6 @@ import std/[options, parseutils, strutils]
 import types
 import position
 import move
-import movegen
 import fen
 
 type
@@ -165,11 +164,6 @@ func parseGoParams(line: string): GoParams =
     else:
       discard
 
-proc defaultBestMove(pos: Position): Option[Move] =
-  for mv in generateMoves(pos):
-    return some(mv)
-  none(Move)
-
 proc runUci*(engine: UciEngine) =
   var currentPos = positionFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
   while true:
@@ -195,16 +189,20 @@ proc runUci*(engine: UciEngine) =
         inc idx
       elif idx < tokens.len and tokens[idx] == "fen":
         let fenStr = tokens[idx + 1 ..< min(tokens.len, idx + 7)].join(" ")
-        currentPos = positionFromFen(fenStr)
+        try:
+          currentPos = positionFromFen(fenStr)
+        except ValueError:
+          discard
         idx = idx + 7
       if idx < tokens.len and tokens[idx] == "moves":
-        applyUciMoves(currentPos, tokens[(idx + 1) .. ^1])
+        try:
+          applyUciMoves(currentPos, tokens[(idx + 1) .. ^1])
+        except ValueError:
+          discard
       engine.setPosition(currentPos)
     of "go":
       let params = if line.len > 2: parseGoParams(line[2 .. ^1]) else: defaultGoParams()
       var result = engine.go(params)
-      if result.bestmove.isNone:
-        result.bestmove = defaultBestMove(currentPos)
       if result.bestmove.isSome:
         var line = "bestmove " & formatUciMove(result.bestmove.get())
         if result.ponder.isSome:

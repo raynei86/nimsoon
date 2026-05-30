@@ -1,4 +1,4 @@
-import std/[options, strutils, unittest]
+import std/[options, unittest]
 
 import nimsoon/[uci, types, move, movegen, position]
 
