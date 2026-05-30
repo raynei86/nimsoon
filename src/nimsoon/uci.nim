@@ -24,6 +24,14 @@ type
 
   UciEngine* = ref object of RootObj
 
+proc sendInfo*(message: string) =
+  stdout.writeLine("info " & message)
+  stdout.flushFile()
+
+proc sendInfo*(parts: openArray[string]) =
+  stdout.writeLine("info " & parts.join(" "))
+  stdout.flushFile()
+
 method name*(engine: UciEngine): string {.base.} =
   "unknown"
 
