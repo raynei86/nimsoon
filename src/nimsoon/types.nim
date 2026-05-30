@@ -93,7 +93,7 @@ const CastlingRightsMask*: array[64, CastlingRights] = block:
 
   mask
 
-func opponent*(c: Color): Color =
+func opponent*(c: Color): Color {.inline.} =
   if c == Color.White:
     Color.Black
   else:
