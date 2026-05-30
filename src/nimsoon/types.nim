@@ -1,6 +1,10 @@
 import std/[bitops]
 
-# Board related types and utils
+
+# ===============================================================================
+# BOARD TYPES & UTILITIES
+# ===============================================================================
+
 type
   Square* = range[0..63]
   Rank = range[0..7]
@@ -34,7 +38,7 @@ func msb*(bb: Bitboard): Square {.inline.} =
 func shift*(bb: Bitboard, n: int): Bitboard {.inline.} =
   ## Signed shift: positive moves toward rank 8, negative toward rank 1.
   if n >= 0: bb shl n else: bb shr (-n)
-  
+
 const
   FullBoard* : Bitboard = 0xFFFFFFFFFFFFFFFF'u64
   Rank1* : Bitboard = 0x00000000000000FF'u64
@@ -46,12 +50,15 @@ const
   NotFileA* : Bitboard = 0xFEFEFEFEFEFEFEFE'u64
   NotFileH* : Bitboard = 0x7F7F7F7F7F7F7F7F'u64
 
-  WhiteKingsidePath* : Bitboard = (Bitboard(1) shl 5) or (Bitboard(1) shl 6)   # f1, g1
-  WhiteQueensidePath* : Bitboard = (Bitboard(1) shl 1) or (Bitboard(1) shl 2) or (Bitboard(1) shl 3)  # b1, c1, d1
-  BlackKingsidePath* : Bitboard = (Bitboard(1) shl 61) or (Bitboard(1) shl 62)  # f8, g8
-  BlackQueensidePath* : Bitboard = (Bitboard(1) shl 57) or (Bitboard(1) shl 58) or (Bitboard(1) shl 59)  # b8, c8, d8  
+  WhiteKingsidePath* : Bitboard = (1'u64 shl 5) or (1'u64 shl 6)   # f1, g1
+  WhiteQueensidePath* : Bitboard = (1'u64 shl 1) or (1'u64 shl 2) or (1'u64 shl 3)  # b1, c1, d1
+  BlackKingsidePath* : Bitboard = (1'u64 shl 61) or (1'u64 shl 62)  # f8, g8
+  BlackQueensidePath* : Bitboard = (1'u64 shl 57) or (1'u64 shl 58) or (1'u64 shl 59)  # b8, c8, d8
 
-# Pieces related types
+# ===============================================================================
+# PIECE TYPES & UTILITIES
+# ===============================================================================
+
 type
   Color* {.pure.} = enum 
     White, Black
@@ -85,7 +92,7 @@ const CastlingRightsMask*: array[64, CastlingRights] = block:
   mask[63] = {csWhiteKingside, csWhiteQueenside, csBlackQueenside}  # h8 - removes black kingside
 
   mask
-  
+
 func opponent*(c: Color): Color =
   if c == Color.White:
     Color.Black
