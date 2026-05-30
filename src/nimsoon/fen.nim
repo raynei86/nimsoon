@@ -17,24 +17,6 @@ proc fenCharToPiece(ch: char): PieceType =
 func fenCharToColor(ch: char): Color =
   if ch.isUpperAscii(): White else: Black
 
-proc parsePlacement(pos: var Position, placementStr: string) =
-  var rank = 7
-  var file = 0
-  
-  for ch in placementStr:
-    if ch == '/':
-      file = 0
-      dec rank
-    elif ch.isDigit():
-      # ch.int - '0'.int converts a char digit into its actual integer value
-      file += (ch.int - '0'.int)
-    else:
-      let piece = fenCharToPiece(ch)
-      let color = fenCharToColor(ch)
-      let sq = rank * 8 + file
-      pos.placePiece(sq, color, piece)
-      inc file  
-
 type BoardLayout = tuple[
   pieces: array[Color, array[PieceType, uint64]],
   byColor: array[Color, uint64],
